@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn { @apply inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-bold transition active:scale-[.98] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy; }
+  .btn-red { @apply bg-stage text-white hover:bg-red-600; }
+  .btn-navy { @apply bg-navy text-white hover:bg-[#0c1d45]; }
+  .input { @apply w-full rounded-xl border border-navy/20 bg-white px-4 py-3 text-navy placeholder:text-navy/40 focus:border-navy focus:outline-none focus:ring-2 focus:ring-sky; }
+  .label { @apply mb-1 block text-sm font-medium text-navy; }
+  .alert-error { @apply rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700; }
+  .alert-ok { @apply rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800; }
+}
+
+body { @apply bg-white text-navy; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

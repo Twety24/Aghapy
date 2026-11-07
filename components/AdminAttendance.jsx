@@ -13,6 +13,7 @@ export default function AdminAttendance({ initial, allowTest }) {
   const [total, setTotal] = useState(0)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState('')
   const live = session && session.status === 'open' && new Date() < new Date(session.ends_at)
 
   async function create(test) {
@@ -22,6 +23,16 @@ export default function AdminAttendance({ initial, allowTest }) {
     setBusy(false)
     if (!res.ok) return setMsg(j.message || 'حصل خطأ.')
     setSession(j.session)
+  }
+
+  async function closeNow() {
+    if (!confirm('تقفل الجلسة دلوقتي وتطلع التقارير وتبعت الإيميل؟ (تجريبي)')) return
+    setBusy(true); setMsg(''); setNote('')
+    const res = await fetch('/api/admin/session/close', { method: 'POST' })
+    const j = await res.json().catch(() => ({}))
+    setBusy(false)
+    if (!res.ok) return setMsg(j.message || 'حصل خطأ.')
+    setSession({ ...session, status: 'closed' }); setNote('اتقفلت الجلسة وطلعت التقارير. شوفها في صفحة التقارير.')
   }
 
   const refreshQr = useCallback(async () => {
@@ -37,7 +48,7 @@ export default function AdminAttendance({ initial, allowTest }) {
     const db = createClient()
     const [{ data }, { count }] = await Promise.all([
       db.from('attendance_records').select('user_id, full_name, checked_in_at').eq('session_id', session.id).eq('status', 'present').order('checked_in_at', { ascending: false }),
-      db.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'member').eq('is_active', true)
+      db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true)
     ])
     setRows(data || []); setTotal(count || 0)
   }, [session])
@@ -51,9 +62,8 @@ export default function AdminAttendance({ initial, allowTest }) {
   }, [live, refreshQr, refreshList])
 
   return (
-    <main className="mx-auto min-h-dvh max-w-3xl bg-ice px-5 py-6">
-      <Link href="/dashboard" className="text-sm underline">رجوع</Link>
-      <h1 className="mt-4 text-2xl font-bold">جلسة الحضور</h1>
+    <div className="mx-auto max-w-3xl">
+      <h1 className="text-2xl font-bold">جلسة الحضور</h1>
 
       {!live && (
         <div className="mt-6 space-y-3 rounded-2xl bg-white p-6 ring-1 ring-navy/10">
@@ -63,6 +73,7 @@ export default function AdminAttendance({ initial, allowTest }) {
         </div>
       )}
       {msg && <p className="alert-error mt-4" role="alert">{msg}</p>}
+      {note && <p className="alert-ok mt-4" role="status">{note}</p>}
 
       {live && (
         <div className="mt-6 grid gap-6 md:grid-cols-2">
@@ -83,6 +94,7 @@ export default function AdminAttendance({ initial, allowTest }) {
           </section>
         </div>
       )}
-    </main>
+      {live && allowTest && <button className="btn btn-navy mt-6" onClick={closeNow} disabled={busy}>إنهاء الجلسة الآن وتوليد التقارير (تجريبي)</button>}
+    </div>
   )
 }

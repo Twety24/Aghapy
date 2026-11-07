@@ -66,9 +66,9 @@ export default async function Dashboard() {
           <span className="text-sm text-navy/50">ابعت فكرتك</span>
         </Link>
         {profile?.role === 'admin' && (
-          <Link href="/admin/attendance" className="flex items-center justify-between rounded-2xl bg-navy p-5 text-white shadow-sm">
-            <span className="text-lg font-bold">جلسة الحضور (أدمن)</span>
-            <span className="text-sm text-sky">QR والحضور</span>
+          <Link href="/admin" className="flex items-center justify-between rounded-2xl bg-navy p-5 text-white shadow-sm">
+            <span className="text-lg font-bold">لوحة الأدمن</span>
+            <span className="text-sm text-sky">إدارة الفريق</span>
           </Link>
         )}
       </main>

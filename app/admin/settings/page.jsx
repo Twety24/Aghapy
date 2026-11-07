@@ -1,0 +1,29 @@
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import SettingsForm from '@/components/SettingsForm'
+
+export const dynamic = 'force-dynamic'
+
+export default async function Page() {
+  const db = await createClient()
+  const [{ data: st }, { data: admins }] = await Promise.all([
+    db.from('settings').select('value').eq('key', 'admin_report_email').maybeSingle(),
+    db.from('profiles').select('id, full_name, email').eq('role', 'admin').eq('is_active', true)
+  ])
+  const checks = [['مفتاح الإيميل (Resend)', !!process.env.RESEND_API_KEY], ['كلمة سر القفل التلقائي', !!process.env.CRON_SECRET]]
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <h1 className="text-2xl font-bold">الإعدادات</h1>
+      <SettingsForm initial={st?.value || ''} />
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
+        <h2 className="font-bold">حالة الإعداد على السيرفر</h2>
+        <ul className="mt-2 space-y-1 text-sm">{checks.map(([l, ok]) => <li key={l}>{ok ? '✅' : '❌'} {l}</li>)}</ul>
+      </section>
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
+        <h2 className="font-bold">الأدمنز ({admins?.length || 0})</h2>
+        <ul className="mt-2 space-y-1 text-sm">{(admins || []).map((a) => <li key={a.id}>{a.full_name} <span className="text-navy/60" dir="ltr">({a.email})</span></li>)}</ul>
+        <Link href="/admin/members" className="mt-3 inline-block text-sm font-bold underline">إضافة أو إزالة أدمن من صفحة الأعضاء</Link>
+      </section>
+    </div>
+  )
+}

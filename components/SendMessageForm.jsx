@@ -1,0 +1,50 @@
+'use client'
+import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+
+export default function SendMessageForm({ members }) {
+  const router = useRouter()
+  const [sel, setSel] = useState(new Set())
+  const [q, setQ] = useState('')
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState({ ok: false, text: '' })
+
+  const shown = useMemo(() => members.filter((m) => (m.full_name + m.email).toLowerCase().includes(q.trim().toLowerCase())), [members, q])
+  const allShown = shown.length > 0 && shown.every((m) => sel.has(m.id))
+  const toggle = (id) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
+  const toggleAll = () => setSel((s) => { const n = new Set(s); shown.forEach((m) => (allShown ? n.delete(m.id) : n.add(m.id))); return n })
+
+  async function send(e) {
+    e.preventDefault()
+    if (!sel.size) return setMsg({ ok: false, text: 'اختار عضو واحد على الأقل.' })
+    setBusy(true); setMsg({ ok: false, text: '' })
+    const { error } = await createClient().rpc('send_message', { p_title: title, p_body: body, p_user_ids: [...sel] })
+    setBusy(false)
+    if (error) return setMsg({ ok: false, text: 'ماقدرناش نبعت الرسالة. اتأكد إن العنوان والنص مكتوبين.' })
+    setMsg({ ok: true, text: `اتبعتت لـ ${sel.size} عضو.` }); setTitle(''); setBody(''); setSel(new Set()); router.refresh()
+  }
+
+  return (
+    <form onSubmit={send} className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-navy/10">
+      <h2 className="font-bold">رسالة جديدة</h2>
+      <input className="input" placeholder="ابحث عن عضو" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" />
+      <label className="flex items-center gap-2 text-sm font-bold">
+        <input type="checkbox" className="h-5 w-5 accent-[#10265a]" checked={allShown} onChange={toggleAll} /> تحديد الكل ({sel.size} مختار)
+      </label>
+      <ul className="max-h-56 space-y-1 overflow-auto rounded-xl bg-ice p-2">
+        {shown.map((m) => (
+          <li key={m.id}><label className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white">
+            <input type="checkbox" className="h-5 w-5 accent-[#10265a]" checked={sel.has(m.id)} onChange={() => toggle(m.id)} />{m.full_name}
+          </label></li>
+        ))}
+      </ul>
+      <input className="input" required placeholder="عنوان الرسالة" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <textarea className="input min-h-32" required placeholder="نص الرسالة" value={body} onChange={(e) => setBody(e.target.value)} />
+      {msg.text && <p className={msg.ok ? 'alert-ok' : 'alert-error'} role="status">{msg.text}</p>}
+      <button className="btn btn-red" disabled={busy}>{busy ? 'جاري الإرسال...' : 'إرسال'}</button>
+    </form>
+  )
+}

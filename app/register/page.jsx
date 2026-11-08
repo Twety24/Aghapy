@@ -7,7 +7,7 @@ import { arabicError } from '@/lib/errors'
 import AuthShell from '@/components/AuthShell'
 import { useT } from '@/components/LangProvider'
 
-const STAGES=['prep','secondary','university','working']
+const STAGES=['prep','secondary','university','graduated']
 const DEPARTMENTS=['acting','scenography','media','music_prep','other']
 export default function RegisterPage(){
  const router=useRouter();const{t}=useT();const[f,setF]=useState({name:'',phone:'',email:'',age:'',birth_date:'',stage:'',department:'',password:'',confirm:''});const[error,setError]=useState('');const[info,setInfo]=useState('');const[busy,setBusy]=useState(false)

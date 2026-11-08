@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const STAGE = { prep: 'إعدادي', secondary: 'ثانوي', university: 'جامعة', working: 'بشتغل' }
-const DEPT = { acting: 'تمثيل', lighting: 'إضاءة', music: 'موسيقى', decor: 'ديكور', mime: 'مايم' }
+const DEPT = { acting: 'تمثيل', scenography: 'سينغرافيا', media: 'ميديا', music_prep: 'إعداد موسيقى', other: 'أخرى' }
 
 export default function MembersManager() {
   const [db] = useState(() => createClient())

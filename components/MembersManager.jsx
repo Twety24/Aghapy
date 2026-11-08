@@ -9,7 +9,6 @@ const birthDate = (value) => {
   const [year, month, day] = value.split('-')
   return day + '/' + month + '/' + year
 }
-
 export default function MembersManager() {
   const [db] = useState(() => createClient())
   const [rows, setRows] = useState([])
@@ -19,17 +18,15 @@ export default function MembersManager() {
   const [msg, setMsg] = useState('')
   const [openId, setOpenId] = useState(null)
   const [hist, setHist] = useState([])
-
   const load = useCallback(async () => {
     const [{ data }, { data: u }] = await Promise.all([
-      db.from('profiles').select('id, full_name, email, phone, birth_date, stage, department, role, is_active, created_at').order('full_name'),
+      db.from('profiles').select('id, full_name, email, phone, birth_date, stage, department, role, is_active, created_at, avatar_url').order('full_name'),
       db.auth.getUser()
     ])
     setRows(data || []); setMe(u.user?.id)
     if (u.user?.id) { const { data: self } = await db.from('profiles').select('is_root').eq('id', u.user.id).single(); setIsRoot(!!self?.is_root) }
   }, [db])
   useEffect(() => { load() }, [load])
-
   async function update(id, patch) {
     setMsg('')
     const { error } = await db.from('profiles').update(patch).eq('id', id)
@@ -54,37 +51,22 @@ export default function MembersManager() {
     setHist((data || []).sort((a, b) => d(b).localeCompare(d(a))).map((x) => ({ date: d(x), status: x.status })))
     setOpenId(id)
   }
-
   const list = rows.filter((m) => (m.full_name + m.email + (m.phone || '')).toLowerCase().includes(q.trim().toLowerCase()))
   const btn = 'rounded-lg px-3 py-1.5 text-sm ring-1 ring-navy/20 hover:bg-ice'
-
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">الأعضاء ({rows.length})</h1>
-        <a href="/api/admin/members/export" className="rounded-lg bg-navy px-4 py-2 text-sm font-bold text-white">تصدير Excel</a>
-      </div>
+      <div className="flex items-center justify-between gap-3"><h1 className="text-2xl font-bold">الأعضاء ({rows.length})</h1><a href="/api/admin/members/export" className="rounded-lg bg-navy px-4 py-2 text-sm font-bold text-white">تصدير Excel</a></div>
       <input className="input" placeholder="ابحث بالاسم أو البريد أو التليفون" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" />
       <p className="rounded-xl bg-white p-3 text-sm text-navy/70 ring-1 ring-navy/10">عشان تضيف أدمن: خلّي الشخص يسجّل حساب عادي الأول، وبعدين اضغط "ترقية لأدمن" جنب اسمه.</p>
       {msg && <p className="alert-error" role="alert">{msg}</p>}
       {list.map((m) => (
         <article key={m.id} className="rounded-2xl bg-white p-4 ring-1 ring-navy/10">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-bold">{m.full_name}</span>
-            {m.role === 'admin' && <span className="rounded-full bg-navy px-2 py-0.5 text-xs text-white">أدمن</span>}
-            {!m.is_active && <span className="rounded-full bg-stage px-2 py-0.5 text-xs text-white">موقوف</span>}
+          <div className="flex items-center gap-3">
+            <img src={m.avatar_url || '/logo.jpg'} alt="" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src='/logo.jpg'}} className="h-14 w-14 shrink-0 rounded-full border border-navy/10 bg-white object-cover"/>
+            <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="font-bold">{m.full_name}</span>{m.role === 'admin' && <span className="rounded-full bg-navy px-2 py-0.5 text-xs text-white">أدمن</span>}{!m.is_active && <span className="rounded-full bg-stage px-2 py-0.5 text-xs text-white">موقوف</span>}</div><p className="text-sm text-navy/60" dir="ltr" style={{ textAlign: 'right' }}>{m.email}</p></div>
           </div>
-          <p className="text-sm text-navy/60" dir="ltr" style={{ textAlign: 'right' }}>{m.email}</p>
-          <div className="mt-1 grid grid-cols-2 gap-1 text-sm text-navy/70">
-            <p>التليفون: <b dir="ltr">{m.phone || 'غير مسجل'}</b></p><p>تاريخ الميلاد: <b>{birthDate(m.birth_date)}</b></p>
-            <p>المرحلة: <b>{STAGE[m.stage] || 'غير محدد'}</b></p><p>القسم: <b>{DEPT[m.department] || 'غير محدد'}</b></p>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button className={btn} onClick={() => rename(m)}>تعديل الاسم</button>
-            <button className={btn} onClick={() => history(m.id)}>سجل الحضور</button>
-            {isRoot && m.id !== me && <button className={btn} onClick={() => toggleAdmin(m)}>{m.role === 'admin' ? 'إزالة الأدمن' : 'ترقية لأدمن'}</button>}
-            {m.id !== me && <button className={btn} onClick={() => toggleActive(m)}>{m.is_active ? 'إيقاف' : 'تفعيل'}</button>}
-          </div>
+          <div className="mt-2 grid grid-cols-2 gap-1 text-sm text-navy/70"><p>التليفون: <b dir="ltr">{m.phone || 'غير مسجل'}</b></p><p>تاريخ الميلاد: <b>{birthDate(m.birth_date)}</b></p><p>المرحلة: <b>{STAGE[m.stage] || 'غير محدد'}</b></p><p>القسم: <b>{DEPT[m.department] || 'غير محدد'}</b></p></div>
+          <div className="mt-3 flex flex-wrap gap-2"><button className={btn} onClick={() => rename(m)}>تعديل الاسم</button><button className={btn} onClick={() => history(m.id)}>سجل الحضور</button>{isRoot && m.id !== me && <button className={btn} onClick={() => toggleAdmin(m)}>{m.role === 'admin' ? 'إزالة الأدمن' : 'ترقية لأدمن'}</button>}{m.id !== me && <button className={btn} onClick={() => toggleActive(m)}>{m.is_active ? 'إيقاف' : 'تفعيل'}</button>}</div>
           {openId === m.id && <ul className="mt-3 space-y-1 border-t border-navy/10 pt-3 text-sm">{hist.map((h, i) => <li key={i} className="flex justify-between"><span>{h.date}</span><span className={h.status === 'present' ? 'text-green-700' : 'text-stage'}>{h.status === 'present' ? 'حاضر' : 'غائب'}</span></li>)}{!hist.length && <li className="text-navy/60">مفيش سجل لسه.</li>}</ul>}
         </article>
       ))}

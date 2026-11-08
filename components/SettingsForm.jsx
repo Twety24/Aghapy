@@ -14,7 +14,7 @@ export default function SettingsForm({ initial }) {
   }
   return (
     <form onSubmit={save} className="space-y-3 rounded-2xl bg-white p-5 ring-1 ring-navy/10">
-      <label className="label" htmlFor="rep">بريد الأدمن اللي بيوصله تقرير الحضور كل سبت</label>
+      <label className="label" htmlFor="rep">بريد الأدمن اللي هيوصله تقرير Excel بعد إغلاق كل جلسة</label>
       <input id="rep" type="email" required dir="ltr" className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
       {msg.text && <p className={msg.ok ? 'alert-ok' : 'alert-error'} role="status">{msg.text}</p>}
       <button className="btn btn-navy" disabled={busy}>حفظ</button>

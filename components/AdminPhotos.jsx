@@ -1,0 +1,13 @@
+'use client'
+import {useCallback,useEffect,useState} from 'react'
+import {createClient} from '@/lib/supabase/client'
+export default function AdminPhotos(){
+ const[db]=useState(()=>createClient());const[albums,setAlbums]=useState([]);const[pending,setPending]=useState([]);const[title,setTitle]=useState('');const[msg,setMsg]=useState('')
+ const load=useCallback(async()=>{const[{data:a},{data:p}]=await Promise.all([db.from('albums').select('id,title').order('created_at',{ascending:false}),db.from('photos').select('id,path,is_anonymous,albums(title),profiles(full_name)').eq('status','pending').order('created_at')]);setAlbums(a||[]);setPending(p||[])},[db])
+ useEffect(()=>{load()},[load]);const url=p=>db.storage.from('gallery').getPublicUrl(p).data.publicUrl
+ async function add(e){e.preventDefault();const{error}=await db.from('albums').insert({title:title.trim()});if(error)return setMsg('اكتب اسم ألبوم صحيح.');setTitle('');load()}
+ async function approve(p){await db.from('photos').update({status:'approved'}).eq('id',p.id);load()}
+ async function reject(p){await db.from('photos').delete().eq('id',p.id);await db.storage.from('gallery').remove([p.path]);load()}
+ async function del(a){if(!confirm('تحذف الألبوم بكل صوره؟'))return;const{data}=await db.from('photos').select('path').eq('album_id',a.id);await db.from('albums').delete().eq('id',a.id);if(data?.length)await db.storage.from('gallery').remove(data.map(x=>x.path));load()}
+ return <div className="mx-auto max-w-3xl space-y-6"><h1 className="text-2xl font-bold">إدارة الصور</h1><section className="space-y-3 rounded-2xl bg-white p-5"><h2 className="font-bold">الألبومات</h2><form onSubmit={add} className="flex gap-2"><input className="input" required value={title} onChange={e=>setTitle(e.target.value)} placeholder="اسم الألبوم"/><button className="rounded-xl bg-navy px-4 font-bold text-white">إضافة</button></form>{msg&&<p>{msg}</p>}{albums.map(a=><div key={a.id} className="flex justify-between rounded-xl bg-ice p-3"><span>{a.title}</span><button onClick={()=>del(a)} className="text-stage underline">حذف</button></div>)}</section><section><h2 className="mb-3 font-bold">صور بانتظار الموافقة ({pending.length})</h2><div className="grid gap-3 md:grid-cols-2">{pending.map(p=><article key={p.id} className="rounded-xl bg-white p-3"><img src={url(p.path)} alt="" className="aspect-square w-full rounded-lg object-cover"/><p className="my-2 text-sm">{p.is_anonymous?'مجهول':p.profiles?.full_name} · {p.albums?.title}</p><div className="flex gap-2"><button className="btn btn-navy" onClick={()=>approve(p)}>موافقة</button><button className="btn btn-red" onClick={()=>reject(p)}>رفض</button></div></article>)}</div></section></div>
+}

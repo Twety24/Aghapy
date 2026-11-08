@@ -7,55 +7,11 @@ import { arabicError } from '@/lib/errors'
 import AuthShell from '@/components/AuthShell'
 import { useT } from '@/components/LangProvider'
 
-const STAGES = ['prep','secondary','university','working']
-const DEPARTMENTS = ['acting','lighting','music','decor','mime']
-
-export default function RegisterPage() {
-  const router = useRouter()
-  const { t } = useT()
-  const [f, setF] = useState({ name:'', phone:'', email:'', age:'', stage:'', department:'', password:'', confirm:'' })
-  const [photo, setPhoto] = useState(null)
-  const [error, setError] = useState('')
-  const [info, setInfo] = useState('')
-  const [busy, setBusy] = useState(false)
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  async function submit(e) {
-    e.preventDefault(); setError(''); setInfo('')
-    const age = Number(f.age)
-    const phone = f.phone.trim()
-    if (f.name.trim().length < 3) return setError(t('error.name'))
-    if (!/^\+?[0-9٠-٩]{8,15}$/.test(phone.replace(/[\s()-]/g,''))) return setError(t('error.phone'))
-    if (!(age >= 5 && age <= 99)) return setError(t('error.age'))
-    if (!f.stage || !f.department) return setError(t('error.stage'))
-    if (f.password.length < 8) return setError(t('error.password'))
-    if (f.password !== f.confirm) return setError(t('error.match'))
-    setBusy(true)
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.signUp({ email:f.email.trim(), password:f.password, options:{ data:{ full_name:f.name.trim(), phone, age, stage:f.stage, department:f.department }, emailRedirectTo:`${location.origin}/auth/callback` } })
-    if (error) { setError(arabicError(error.message)); setBusy(false); return }
-    if (data.session && photo) {
-      const path = `${data.user.id}/${Date.now()}.jpg`
-      const up = await supabase.storage.from('avatars').upload(path,photo,{upsert:true})
-      if (!up.error) await supabase.from('profiles').update({avatar_url:supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl}).eq('id',data.user.id)
-    }
-    if (data.session) { router.replace('/dashboard'); router.refresh(); return }
-    setInfo(t('register.checkMail') || 'Check your email to confirm your account.')
-    setBusy(false)
-  }
-  return <AuthShell title={t('register.title')} subtitle={t('register.sub')}>
-    <form onSubmit={submit} className="space-y-4">
-      <div><label className="label" htmlFor="photo">{t('register.photo')}</label><input id="photo" type="file" accept="image/*" className="input" onChange={e=>setPhoto(e.target.files?.[0]||null)}/></div>
-      <div><label className="label" htmlFor="name">{t('register.name')}</label><input id="name" required className="input" value={f.name} onChange={set('name')} autoComplete="name"/></div>
-      <div><label className="label" htmlFor="phone">{t('register.phone')}</label><input id="phone" type="tel" required dir="ltr" className="input" value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="+20 1xxxxxxxxx"/></div>
-      <div><label className="label" htmlFor="age">{t('register.age')}</label><input id="age" type="number" min="5" max="99" required className="input" value={f.age} onChange={set('age')}/></div>
-      <div><label className="label" htmlFor="stage">{t('register.stage')}</label><select id="stage" required className="input" value={f.stage} onChange={set('stage')}><option value="">{t('register.choose')}</option>{STAGES.map(s=><option key={s} value={s}>{t('stage.'+s)}</option>)}</select></div>
-      <div><label className="label" htmlFor="department">{t('register.department')}</label><select id="department" required className="input" value={f.department} onChange={set('department')}><option value="">{t('register.choose')}</option>{DEPARTMENTS.map(s=><option key={s} value={s}>{t('department.'+s)}</option>)}</select></div>
-      <div><label className="label" htmlFor="email">{t('register.email')}</label><input id="email" type="email" required dir="ltr" className="input" value={f.email} onChange={set('email')} autoComplete="email"/></div>
-      <div><label className="label" htmlFor="password">{t('register.password')}</label><input id="password" type="password" required dir="ltr" className="input" value={f.password} onChange={set('password')} autoComplete="new-password"/></div>
-      <div><label className="label" htmlFor="confirm">{t('register.confirm')}</label><input id="confirm" type="password" required dir="ltr" className="input" value={f.confirm} onChange={set('confirm')} autoComplete="new-password"/></div>
-      {error&&<p className="alert-error" role="alert">{error}</p>}{info&&<p className="alert-ok" role="status">{info}</p>}
-      <button className="btn btn-red" disabled={busy}>{busy?t('register.busy'):t('register.submit')}</button>
-      <p className="text-center text-sm">{t('register.have')} <Link href="/login" className="font-bold underline">{t('register.login')}</Link></p>
-    </form>
-  </AuthShell>
+const STAGES=['prep','secondary','university','working']
+const DEPARTMENTS=['acting','scenography','media','music_prep','other']
+export default function RegisterPage(){
+ const router=useRouter();const{t}=useT();const[f,setF]=useState({name:'',phone:'',email:'',age:'',stage:'',department:'',password:'',confirm:''});const[error,setError]=useState('');const[info,setInfo]=useState('');const[busy,setBusy]=useState(false)
+ const set=k=>e=>setF({...f,[k]:e.target.value})
+ async function submit(e){e.preventDefault();setError('');setInfo('');const age=Number(f.age);const phone=f.phone.trim();if(f.name.trim().length<3)return setError(t('error.name'));if(!/^\+?[0-9٠-٩]{8,15}$/.test(phone.replace(/[\s()-]/g,'')))return setError(t('error.phone'));if(!(age>=5&&age<=99))return setError(t('error.age'));if(!f.stage||!f.department)return setError(t('error.stage'));if(f.password.length<8)return setError(t('error.password'));if(f.password!==f.confirm)return setError(t('error.match'));setBusy(true);const db=createClient();const{data,error}=await db.auth.signUp({email:f.email.trim(),password:f.password,options:{data:{full_name:f.name.trim(),phone,age,stage:f.stage,department:f.department},emailRedirectTo:`${location.origin}/auth/callback`}});if(error){setError(arabicError(error.message));setBusy(false);return}if(data.session){router.replace('/dashboard');router.refresh();return}setInfo(t('register.checkMail')||'Check your email to confirm your account.');setBusy(false)}
+ return <AuthShell title={t('register.title')} subtitle={t('register.sub')}><form onSubmit={submit} className="space-y-4"><div><label className="label" htmlFor="name">{t('register.name')}</label><input id="name" required className="input" value={f.name} onChange={set('name')} autoComplete="name"/></div><div><label className="label" htmlFor="phone">{t('register.phone')}</label><input id="phone" type="tel" required dir="ltr" className="input" value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="+20 1xxxxxxxxx"/></div><div><label className="label" htmlFor="age">{t('register.age')}</label><input id="age" type="number" min="5" max="99" required className="input" value={f.age} onChange={set('age')}/></div><div><label className="label" htmlFor="stage">{t('register.stage')}</label><select id="stage" required className="input" value={f.stage} onChange={set('stage')}><option value="">{t('register.choose')}</option>{STAGES.map(s=><option key={s} value={s}>{t('stage.'+s)}</option>)}</select></div><div><label className="label" htmlFor="department">{t('register.department')}</label><select id="department" required className="input" value={f.department} onChange={set('department')}><option value="">{t('register.choose')}</option>{DEPARTMENTS.map(s=><option key={s} value={s}>{t('department.'+s)}</option>)}</select></div><div><label className="label" htmlFor="email">{t('register.email')}</label><input id="email" type="email" required dir="ltr" className="input" value={f.email} onChange={set('email')} autoComplete="email"/></div><div><label className="label" htmlFor="password">{t('register.password')}</label><input id="password" type="password" required dir="ltr" className="input" value={f.password} onChange={set('password')} autoComplete="new-password"/></div><div><label className="label" htmlFor="confirm">{t('register.confirm')}</label><input id="confirm" type="password" required dir="ltr" className="input" value={f.confirm} onChange={set('confirm')} autoComplete="new-password"/></div>{error&&<p className="alert-error" role="alert">{error}</p>}{info&&<p className="alert-ok" role="status">{info}</p>}<button className="btn btn-red" disabled={busy}>{busy?t('register.busy'):t('register.submit')}</button><p className="text-center text-sm">{t('register.have')} <Link href="/login" className="font-bold underline">{t('register.login')}</Link></p></form></AuthShell>
 }

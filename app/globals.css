@@ -18,3 +18,8 @@ html[data-theme='dark'] .text-navy,html[data-theme='dark'] .text-navy\/70,html[d
 html[data-theme='dark'] .input{background:#111b2b;color:#f3f4f6;border-color:#526078;}
 html[data-theme='dark'] .ring-navy\/10,html[data-theme='dark'] .border-navy\/10{--tw-ring-color:rgb(148 163 184 / .25);border-color:rgb(148 163 184 / .25);}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.brand-logo{border-radius:1rem;border:1px solid rgb(16 38 90 / .15);object-fit:cover;}
+@keyframes logo-loading{to{transform:rotate(360deg)}}
+.logo-loading{animation:logo-loading 1.8s linear infinite;}
+@media(prefers-reduced-motion:reduce){.logo-loading{animation:none}}

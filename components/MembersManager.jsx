@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-const STAGE = { prep: 'إعدادي', secondary: 'ثانوي', university: 'جامعة', working: 'بشتغل' }
+const STAGE = { prep: 'إعدادي', secondary: 'ثانوي', university: 'جامعة', graduated: 'خريج' }
 const DEPT = { acting: 'تمثيل', scenography: 'سينغرافيا', media: 'ميديا', music_prep: 'إعداد موسيقى', other: 'أخرى' }
 const birthDate = (value) => {
   if (!value) return 'غير مسجل'

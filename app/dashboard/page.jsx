@@ -1,77 +1,24 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getLang } from '@/lib/lang'
+import { tFor } from '@/lib/i18n'
+import Toggles from '@/components/Toggles'
+import HomeMenu from '@/components/HomeMenu'
 
 export const dynamic = 'force-dynamic'
-
-async function signOut() {
-  'use server'
-  await (await createClient()).auth.signOut()
-  redirect('/login')
-}
-
+async function signOut() { 'use server'; await (await createClient()).auth.signOut(); redirect('/login') }
 export default async function Dashboard() {
-  const supabase = (await createClient())
+  const t = tFor(await getLang())
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
-
-  const { data: profile } = await supabase.from('profiles').select('full_name, role, is_active').eq('id', user.id).single()
-  const { count: unread } = await supabase
-    .from('message_recipients').select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id).is('read_at', null)
-
-  if (profile && !profile.is_active) {
-    return (
-      <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="alert-error">الحساب ده موقوف. كلّم المسؤول.</p>
-        <form action={signOut}><button className="btn btn-navy">تسجيل الخروج</button></form>
-      </main>
-    )
-  }
-
+  const { data: profile } = await supabase.from('profiles').select('full_name, role, is_active, avatar_url').eq('id', user.id).single()
+  const { count: unread } = await supabase.from('message_recipients').select('id', { count: 'exact', head: true }).eq('user_id', user.id).is('read_at', null)
+  if (profile && !profile.is_active) return <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center"><p className="alert-error">Account suspended. Contact the administrator.</p><form action={signOut}><button className="btn btn-navy">{t('common.logout')}</button></form></main>
   const first = (profile?.full_name || '').split(' ')[0]
-
-  return (
-    <div className="min-h-dvh bg-ice">
-      <header className="bg-navy px-5 pb-10 pt-5 text-white">
-        <div className="mx-auto flex max-w-md items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="rounded-xl bg-white p-1"><Image src="/logo.jpg" alt="" width={44} height={44} /></span>
-            <div>
-              <p className="text-sm text-sky">أهلاً بيك</p>
-              <p className="text-lg font-bold">{first}</p>
-            </div>
-          </div>
-          <form action={signOut}><button className="rounded-lg px-3 py-2 text-sm text-sky ring-1 ring-sky/40 hover:bg-white/10">خروج</button></form>
-        </div>
-      </header>
-
-      <main className="mx-auto -mt-6 max-w-md space-y-4 px-5 pb-10">
-        <Link href="/scan" className="block rounded-3xl bg-white p-6 text-center shadow-sm ring-1 ring-navy/10 hover:ring-navy/30">
-          <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-stage ring-8 ring-stage/15">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg>
-          </div>
-          <h2 className="mt-4 text-xl font-bold">تسجيل الحضور</h2>
-          <p className="mt-1 text-sm text-navy/70">امسح كود الاجتماع. السبت من 6 لـ 11 مساءً.</p>
-        </Link>
-
-        <Link href="/messages" className="flex items-center justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy/10 hover:ring-navy/30">
-          <span className="text-lg font-bold">الرسائل</span>
-          {unread > 0 ? <span className="rounded-full bg-stage px-3 py-1 text-sm font-bold text-white">{unread} جديدة</span> : <span className="text-sm text-navy/50">مفيش جديد</span>}
-        </Link>
-
-        <Link href="/suggestions" className="flex items-center justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy/10 hover:ring-navy/30">
-          <span className="text-lg font-bold">المقترحات</span>
-          <span className="text-sm text-navy/50">ابعت فكرتك</span>
-        </Link>
-        {profile?.role === 'admin' && (
-          <Link href="/admin" className="flex items-center justify-between rounded-2xl bg-navy p-5 text-white shadow-sm">
-            <span className="text-lg font-bold">لوحة الأدمن</span>
-            <span className="text-sm text-sky">إدارة الفريق</span>
-          </Link>
-        )}
-      </main>
-    </div>
-  )
+  const cards = [['/messages','nav.messages'],['/photos','nav.photos'],['/meeting','nav.meeting'],['/excuses','nav.excuse'],['/suggestions','nav.suggestions'],['/chats','nav.chats']]
+  const menu = [['/scan','home.scan'],...cards,['/profile','nav.profile'],...(profile?.role === 'admin' ? [['/admin','nav.admin']] : [])]
+  return <div className="min-h-dvh bg-ice"><header className="bg-navy px-4 pb-24 pt-4 text-white"><div className="mx-auto flex max-w-md items-center justify-between"><HomeMenu links={menu}/><div className="flex items-center gap-2"><Toggles className="text-sky"/><form action={signOut}><button className="rounded-lg border border-sky/50 px-3 py-1.5 text-sm text-sky">{t('common.logout')}</button></form></div></div></header><main className="mx-auto -mt-20 max-w-md space-y-4 px-5 pb-10"><section className="text-center"><div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white text-3xl font-bold text-navy">{first.slice(0,1)}</div><h1 className="mt-3 text-2xl font-bold">{t('home.hi',{name:first})}</h1><p className="mt-1 text-navy/70">{t('home.waiting')}</p><p className="font-bold">{t('home.welcome')}</p></section><Link href="/scan" className="flex items-center gap-4 rounded-3xl bg-stage p-5 text-white shadow-sm"><span className="text-3xl">▦</span><span><span className="block text-xl font-bold">{t('home.scan')}</span><span className="text-sm opacity-90">{t('home.scanSub')}</span></span></Link><div className="grid grid-cols-2 gap-3">{cards.map(([href,key])=><Link key={href} href={href} className="relative rounded-2xl bg-white p-5 text-center font-bold shadow-sm ring-1 ring-navy/10">{t(key)}{href==='/messages'&&unread>0&&<span className="absolute end-3 top-3 rounded-full bg-stage px-2 py-0.5 text-xs text-white">{unread}</span>}</Link>)}</div>{profile?.role==='admin'&&<Link href="/admin" className="block rounded-2xl bg-navy p-4 text-center font-bold text-white">{t('nav.admin')}</Link>}</main></div>
 }

@@ -11,10 +11,10 @@ const STAGES = [
 ]
 const DEPARTMENTS = [
   { value: 'acting', label: 'تمثيل' },
-  { value: 'lighting', label: 'إضاءة' },
-  { value: 'music', label: 'موسيقى' },
-  { value: 'decor', label: 'ديكور' },
-  { value: 'mime', label: 'مايم' }
+  { value: 'scenography', label: 'سينغرافيا' },
+  { value: 'media', label: 'ميديا' },
+  { value: 'music_prep', label: 'إعداد موسيقى' },
+  { value: 'other', label: 'أخرى' }
 ]
 
 export default function SendMessageForm({ members, groups = [] }) {

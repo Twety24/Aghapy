@@ -1,33 +1,6 @@
-import { NextResponse } from 'next/server'
-import { getAdmin } from '@/lib/guard'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { saturdayWindow, cairoParts, dateStr } from '@/lib/attendance'
-
-const COLS = 'id, meeting_date, starts_at, ends_at, status'
-
-export async function POST(req) {
-  const admin = await getAdmin()
-  if (!admin) return NextResponse.json({ message: 'مش مسموح.' }, { status: 403 })
-  const { test } = await req.json().catch(() => ({}))
-  const db = createAdminClient()
-  const now = new Date()
-  let w
-
-  if (test) {
-    if (process.env.ALLOW_TEST_SESSIONS !== 'true') return NextResponse.json({ message: 'الجلسات التجريبية مقفولة.' }, { status: 403 })
-    w = { meetingDate: dateStr(cairoParts(now)), starts: now, ends: new Date(now.getTime() + 2 * 3600e3) }
-    await db.from('attendance_sessions').delete().eq('meeting_date', w.meetingDate) // test mode replaces today's session
-  } else {
-    w = saturdayWindow(now)
-    if (!w) return NextResponse.json({ message: 'جلسة الحضور بتتعمل يوم السبت بس.' }, { status: 400 })
-  }
-
-  const existing = await db.from('attendance_sessions').select(COLS).eq('meeting_date', w.meetingDate).maybeSingle()
-  if (existing.data) return NextResponse.json({ session: existing.data })
-
-  const { data, error } = await db.from('attendance_sessions')
-    .insert({ meeting_date: w.meetingDate, starts_at: w.starts.toISOString(), ends_at: w.ends.toISOString(), created_by: admin.id })
-    .select(COLS).single()
-  if (error) return NextResponse.json({ message: 'ماقدرناش ننشئ الجلسة.' }, { status: 500 })
-  return NextResponse.json({ session: data })
-}
+import {NextResponse} from 'next/server'
+import {getAdmin} from '@/lib/guard'
+import {createAdminClient} from '@/lib/supabase/admin'
+const COLS='id, meeting_date, starts_at, ends_at, status'
+function cairoDate(value){return new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value))}
+export async function POST(req){const admin=await getAdmin();if(!admin)return NextResponse.json({message:'مش مسموح.'},{status:403});const{startsAt,endsAt}=await req.json().catch(()=>({}));const start=new Date(startsAt);const end=new Date(endsAt);const now=new Date();if(!startsAt||!endsAt||!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime()))return NextResponse.json({message:'اختار تاريخ ووقت البداية والنهاية.'},{status:400});if(start<now-60000)return NextResponse.json({message:'وقت بداية الاجتماع لازم يكون في المستقبل.'},{status:400});if(end<=start)return NextResponse.json({message:'وقت النهاية لازم يكون بعد البداية.'},{status:400});if(end-start>24*60*60*1000)return NextResponse.json({message:'مدة الاجتماع لا يمكن أن تتجاوز 24 ساعة.'},{status:400});const db=createAdminClient();const meeting_date=cairoDate(start);const{data:existing}=await db.from('attendance_sessions').select(COLS).eq('meeting_date',meeting_date).maybeSingle();if(existing)return NextResponse.json({message:'فيه اجتماع مسجل بالفعل في نفس اليوم.'},{status:409});const{data,error}=await db.from('attendance_sessions').insert({meeting_date,starts_at:start.toISOString(),ends_at:end.toISOString(),created_by:admin.id}).select(COLS).single();if(error)return NextResponse.json({message:'ماقدرناش ننشئ الاجتماع. تأكد إن مفيش اجتماع تاني في نفس اليوم.'},{status:500});return NextResponse.json({session:data})}

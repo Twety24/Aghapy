@@ -6,14 +6,15 @@ const one = (x) => (Array.isArray(x) ? x[0] : x)
 
 export default async function Page() {
   const db = await createClient()
-  const [{ data: members }, { data: sent }] = await Promise.all([
+  const [{ data: members }, { data: sent }, { data: groups }] = await Promise.all([
     db.from('profiles').select('id, full_name, email, stage, department').eq('is_active', true).order('full_name'),
-    db.from('messages').select('id, title, body, created_at, message_recipients(read_at, profiles(full_name))').order('created_at', { ascending: false }).limit(20)
+    db.from('messages').select('id, title, body, created_at, message_recipients(read_at, profiles(full_name))').order('created_at', { ascending: false }).limit(20),
+    db.from('groups').select('id, name, group_members(user_id)').order('name')
   ])
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <h1 className="text-2xl font-bold">الرسائل</h1>
-      <SendMessageForm members={members || []} />
+      <SendMessageForm members={members || []} groups={groups || []} />
       <h2 className="font-bold">اللي اتبعت</h2>
       {(sent || []).map((m) => {
         const rs = m.message_recipients || []

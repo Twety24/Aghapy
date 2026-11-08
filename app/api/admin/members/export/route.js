@@ -5,7 +5,7 @@ import { membersBuffer } from '@/lib/reports'
 
 export async function GET() {
   if (!(await getAdmin())) return NextResponse.json({ message: 'مش مسموح.' }, { status: 403 })
-  const { data } = await createAdminClient().from('profiles').select('full_name, email, phone, age, stage, department, role, is_active, created_at').order('full_name')
+  const { data } = await createAdminClient().from('profiles').select('full_name, email, phone, birth_date, stage, department, role, is_active, created_at').order('full_name')
   return new Response(await membersBuffer(data || []), {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

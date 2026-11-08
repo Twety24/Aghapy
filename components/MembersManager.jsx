@@ -9,6 +9,7 @@ export default function MembersManager() {
   const [db] = useState(() => createClient())
   const [rows, setRows] = useState([])
   const [me, setMe] = useState(null)
+  const [isRoot, setIsRoot] = useState(false)
   const [q, setQ] = useState('')
   const [msg, setMsg] = useState('')
   const [openId, setOpenId] = useState(null)
@@ -20,6 +21,7 @@ export default function MembersManager() {
       db.auth.getUser()
     ])
     setRows(data || []); setMe(u.user?.id)
+    if (u.user?.id) { const { data: self } = await db.from('profiles').select('is_root').eq('id', u.user.id).single(); setIsRoot(!!self?.is_root) }
   }, [db])
   useEffect(() => { load() }, [load])
 
@@ -75,7 +77,7 @@ export default function MembersManager() {
           <div className="mt-3 flex flex-wrap gap-2">
             <button className={btn} onClick={() => rename(m)}>تعديل الاسم</button>
             <button className={btn} onClick={() => history(m.id)}>سجل الحضور</button>
-            {m.id !== me && <button className={btn} onClick={() => toggleAdmin(m)}>{m.role === 'admin' ? 'إزالة الأدمن' : 'ترقية لأدمن'}</button>}
+            {isRoot && m.id !== me && <button className={btn} onClick={() => toggleAdmin(m)}>{m.role === 'admin' ? 'إزالة الأدمن' : 'ترقية لأدمن'}</button>}
             {m.id !== me && <button className={btn} onClick={() => toggleActive(m)}>{m.is_active ? 'إيقاف' : 'تفعيل'}</button>}
           </div>
           {openId === m.id && <ul className="mt-3 space-y-1 border-t border-navy/10 pt-3 text-sm">{hist.map((h, i) => <li key={i} className="flex justify-between"><span>{h.date}</span><span className={h.status === 'present' ? 'text-green-700' : 'text-stage'}>{h.status === 'present' ? 'حاضر' : 'غائب'}</span></li>)}{!hist.length && <li className="text-navy/60">مفيش سجل لسه.</li>}</ul>}

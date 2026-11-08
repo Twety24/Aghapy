@@ -1,16 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer components {
-  .btn { @apply inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-bold transition active:scale-[.98] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy; }
-  .btn-red { @apply bg-stage text-white hover:bg-red-600; }
-  .btn-navy { @apply bg-navy text-white hover:bg-[#0c1d45]; }
-  .input { @apply w-full rounded-xl border border-navy/20 bg-white px-4 py-3 text-navy placeholder:text-navy/40 focus:border-navy focus:outline-none focus:ring-2 focus:ring-sky; }
-  .label { @apply mb-1 block text-sm font-medium text-navy; }
-  .alert-error { @apply rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700; }
-  .alert-ok { @apply rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800; }
+ .btn{@apply inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-bold transition active:scale-[.98] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy;}
+ .btn-red{@apply bg-stage text-white hover:bg-red-600;}
+ .btn-navy{@apply bg-navy text-white hover:bg-[#0c1d45];}
+ .input{@apply w-full rounded-xl border border-navy/20 bg-white px-4 py-3 text-navy placeholder:text-navy/40 focus:border-navy focus:outline-none focus:ring-2 focus:ring-sky;}
+ .label{@apply mb-1 block text-sm font-medium text-navy;}
+ .alert-error{@apply rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700;}
+ .alert-ok{@apply rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800;}
 }
-
-body { @apply bg-white text-navy; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+body{@apply bg-white text-navy;}
+html[data-theme='dark'] body{background:#101827;color:#e5e7eb;}
+html[data-theme='dark'] .bg-white{background:#1b2638!important;color:#e5e7eb;}
+html[data-theme='dark'] .bg-ice{background:#111b2b!important;}
+html[data-theme='dark'] .text-navy,html[data-theme='dark'] .text-navy\/70,html[data-theme='dark'] .text-navy\/60,html[data-theme='dark'] .text-navy\/50{color:#e5e7eb!important;}
+html[data-theme='dark'] .input{background:#111b2b;color:#f3f4f6;border-color:#526078;}
+html[data-theme='dark'] .ring-navy\/10,html[data-theme='dark'] .border-navy\/10{--tw-ring-color:rgb(148 163 184 / .25);border-color:rgb(148 163 184 / .25);}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}

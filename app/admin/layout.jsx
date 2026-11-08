@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }) {
     <div className="min-h-dvh bg-ice md:flex">
       <aside className="bg-navy text-white md:min-h-dvh md:w-60 md:shrink-0">
         <div className="flex items-center gap-3 p-4">
-          <span className="rounded-xl bg-white p-1"><Image src="/logo.jpg" alt="" width={40} height={40} /></span>
+          <span className="rounded-xl bg-white p-1"><Image src="/logo.jpg" alt="" width={40} height={40} className="brand-logo" /></span>
           <span className="font-bold">لوحة الأدمن</span>
         </div>
         <AdminNav />

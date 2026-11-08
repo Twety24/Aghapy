@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import SettingsForm from '@/components/SettingsForm'
+import StorageCleanupButton from '@/components/StorageCleanupButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +16,7 @@ export default async function Page() {
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">الإعدادات</h1>
       <SettingsForm initial={st?.value || ''} />
+      <StorageCleanupButton />
       <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
         <h2 className="font-bold">حالة الإعداد على السيرفر</h2>
         <ul className="mt-2 space-y-1 text-sm">{checks.map(([l, ok]) => <li key={l}>{ok ? '✅' : '❌'} {l}</li>)}</ul>

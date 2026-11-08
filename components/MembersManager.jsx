@@ -4,6 +4,11 @@ import { createClient } from '@/lib/supabase/client'
 
 const STAGE = { prep: 'إعدادي', secondary: 'ثانوي', university: 'جامعة', working: 'بشتغل' }
 const DEPT = { acting: 'تمثيل', scenography: 'سينغرافيا', media: 'ميديا', music_prep: 'إعداد موسيقى', other: 'أخرى' }
+const birthDate = (value) => {
+  if (!value) return 'غير مسجل'
+  const [year, month, day] = value.split('-')
+  return day + '/' + month + '/' + year
+}
 
 export default function MembersManager() {
   const [db] = useState(() => createClient())
@@ -17,7 +22,7 @@ export default function MembersManager() {
 
   const load = useCallback(async () => {
     const [{ data }, { data: u }] = await Promise.all([
-      db.from('profiles').select('id, full_name, email, phone, age, stage, department, role, is_active, created_at').order('full_name'),
+      db.from('profiles').select('id, full_name, email, phone, birth_date, stage, department, role, is_active, created_at').order('full_name'),
       db.auth.getUser()
     ])
     setRows(data || []); setMe(u.user?.id)
@@ -37,10 +42,10 @@ export default function MembersManager() {
   }
   function toggleAdmin(m) {
     const making = m.role !== 'admin'
-    if (confirm(making ? `تحوّل ${m.full_name} لأدمن؟ هيقدر يشوف ويعدّل كل حاجة.` : `تشيل صلاحية الأدمن من ${m.full_name}؟`)) update(m.id, { role: making ? 'admin' : 'member' })
+    if (confirm(making ? 'تحوّل ' + m.full_name + ' لأدمن؟ هيقدر يشوف ويعدّل كل حاجة.' : 'تشيل صلاحية الأدمن من ' + m.full_name + '؟')) update(m.id, { role: making ? 'admin' : 'member' })
   }
   function toggleActive(m) {
-    if (confirm(m.is_active ? `توقف حساب ${m.full_name}؟` : `تفعّل حساب ${m.full_name}؟`)) update(m.id, { is_active: !m.is_active })
+    if (confirm(m.is_active ? 'توقف حساب ' + m.full_name + '؟' : 'تفعّل حساب ' + m.full_name + '؟')) update(m.id, { is_active: !m.is_active })
   }
   async function history(id) {
     if (openId === id) return setOpenId(null)
@@ -71,7 +76,7 @@ export default function MembersManager() {
           </div>
           <p className="text-sm text-navy/60" dir="ltr" style={{ textAlign: 'right' }}>{m.email}</p>
           <div className="mt-1 grid grid-cols-2 gap-1 text-sm text-navy/70">
-            <p>التليفون: <b dir="ltr">{m.phone || 'غير مسجل'}</b></p><p>السن: <b>{m.age ?? 'غير مسجل'}</b></p>
+            <p>التليفون: <b dir="ltr">{m.phone || 'غير مسجل'}</b></p><p>تاريخ الميلاد: <b>{birthDate(m.birth_date)}</b></p>
             <p>المرحلة: <b>{STAGE[m.stage] || 'غير محدد'}</b></p><p>القسم: <b>{DEPT[m.department] || 'غير محدد'}</b></p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">

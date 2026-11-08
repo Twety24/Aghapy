@@ -2,6 +2,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+const STAGE = { prep: 'إعدادي', secondary: 'ثانوي', university: 'جامعة', working: 'بشتغل' }
+const DEPT = { acting: 'تمثيل', lighting: 'إضاءة', music: 'موسيقى', decor: 'ديكور', mime: 'مايم' }
+
 export default function MembersManager() {
   const [db] = useState(() => createClient())
   const [rows, setRows] = useState([])
@@ -13,7 +16,7 @@ export default function MembersManager() {
 
   const load = useCallback(async () => {
     const [{ data }, { data: u }] = await Promise.all([
-      db.from('profiles').select('id, full_name, email, role, is_active, created_at').order('full_name'),
+      db.from('profiles').select('id, full_name, email, phone, age, stage, department, role, is_active, created_at').order('full_name'),
       db.auth.getUser()
     ])
     setRows(data || []); setMe(u.user?.id)
@@ -23,7 +26,7 @@ export default function MembersManager() {
   async function update(id, patch) {
     setMsg('')
     const { error } = await db.from('profiles').update(patch).eq('id', id)
-    if (error) setMsg(error.message.includes('أدمن') ? error.message : 'ماقدرناش ننفّذ التعديل.')
+    if (error) setMsg('ماقدرناش ننفّذ التعديل.')
     else load()
   }
   function rename(m) {
@@ -45,7 +48,7 @@ export default function MembersManager() {
     setOpenId(id)
   }
 
-  const list = rows.filter((m) => (m.full_name + m.email).toLowerCase().includes(q.trim().toLowerCase()))
+  const list = rows.filter((m) => (m.full_name + m.email + (m.phone || '')).toLowerCase().includes(q.trim().toLowerCase()))
   const btn = 'rounded-lg px-3 py-1.5 text-sm ring-1 ring-navy/20 hover:bg-ice'
 
   return (
@@ -54,7 +57,7 @@ export default function MembersManager() {
         <h1 className="text-2xl font-bold">الأعضاء ({rows.length})</h1>
         <a href="/api/admin/members/export" className="rounded-lg bg-navy px-4 py-2 text-sm font-bold text-white">تصدير Excel</a>
       </div>
-      <input className="input" placeholder="ابحث بالاسم أو البريد" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" />
+      <input className="input" placeholder="ابحث بالاسم أو البريد أو التليفون" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" />
       <p className="rounded-xl bg-white p-3 text-sm text-navy/70 ring-1 ring-navy/10">عشان تضيف أدمن: خلّي الشخص يسجّل حساب عادي الأول، وبعدين اضغط "ترقية لأدمن" جنب اسمه.</p>
       {msg && <p className="alert-error" role="alert">{msg}</p>}
       {list.map((m) => (
@@ -65,18 +68,17 @@ export default function MembersManager() {
             {!m.is_active && <span className="rounded-full bg-stage px-2 py-0.5 text-xs text-white">موقوف</span>}
           </div>
           <p className="text-sm text-navy/60" dir="ltr" style={{ textAlign: 'right' }}>{m.email}</p>
+          <div className="mt-1 grid grid-cols-2 gap-1 text-sm text-navy/70">
+            <p>التليفون: <b dir="ltr">{m.phone || 'غير مسجل'}</b></p><p>السن: <b>{m.age ?? 'غير مسجل'}</b></p>
+            <p>المرحلة: <b>{STAGE[m.stage] || 'غير محدد'}</b></p><p>القسم: <b>{DEPT[m.department] || 'غير محدد'}</b></p>
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button className={btn} onClick={() => rename(m)}>تعديل الاسم</button>
             <button className={btn} onClick={() => history(m.id)}>سجل الحضور</button>
             {m.id !== me && <button className={btn} onClick={() => toggleAdmin(m)}>{m.role === 'admin' ? 'إزالة الأدمن' : 'ترقية لأدمن'}</button>}
             {m.id !== me && <button className={btn} onClick={() => toggleActive(m)}>{m.is_active ? 'إيقاف' : 'تفعيل'}</button>}
           </div>
-          {openId === m.id && (
-            <ul className="mt-3 space-y-1 border-t border-navy/10 pt-3 text-sm">
-              {hist.map((h, i) => <li key={i} className="flex justify-between"><span>{h.date}</span><span className={h.status === 'present' ? 'text-green-700' : 'text-stage'}>{h.status === 'present' ? 'حاضر' : 'غائب'}</span></li>)}
-              {!hist.length && <li className="text-navy/60">مفيش سجل لسه.</li>}
-            </ul>
-          )}
+          {openId === m.id && <ul className="mt-3 space-y-1 border-t border-navy/10 pt-3 text-sm">{hist.map((h, i) => <li key={i} className="flex justify-between"><span>{h.date}</span><span className={h.status === 'present' ? 'text-green-700' : 'text-stage'}>{h.status === 'present' ? 'حاضر' : 'غائب'}</span></li>)}{!hist.length && <li className="text-navy/60">مفيش سجل لسه.</li>}</ul>}
         </article>
       ))}
     </div>

@@ -10,5 +10,5 @@ export const viewport = { themeColor: '#10265a', width: 'device-width', initialS
 const themeScript = `try{var t=localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){ }`
 export default async function RootLayout({ children }) {
   const lang = await getLang()
-  return <html lang={lang} dir={lang === 'en' ? 'ltr' : 'rtl'} suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${plex.variable} font-sans antialiased`}><LangProvider lang={lang}>{children}</LangProvider><RegisterSW /></body></html>
+  return <html lang={lang} dir={lang === 'en' ? 'ltr' : 'rtl'} suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${plex.variable} font-sans antialiased site-body`}><LangProvider lang={lang}><div className="site-content">{children}</div><footer className="site-footer" dir="ltr">© 2026 ABC Team. All copyrights reserved.</footer></LangProvider><RegisterSW /></body></html>
 }

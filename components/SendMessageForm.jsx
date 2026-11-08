@@ -17,7 +17,7 @@ const DEPARTMENTS = [
   { value: 'mime', label: 'مايم' }
 ]
 
-export default function SendMessageForm({ members }) {
+export default function SendMessageForm({ members, groups = [] }) {
   const router = useRouter()
   const [sel, setSel] = useState(new Set())
   const [q, setQ] = useState('')
@@ -31,6 +31,16 @@ export default function SendMessageForm({ members }) {
   const toggle = (id) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
   const toggleCategory = (field, value) => {
     const ids = members.filter((m) => m[field] === value).map((m) => m.id)
+    if (!ids.length) return
+    setSel((s) => {
+      const n = new Set(s)
+      const remove = ids.every((id) => n.has(id))
+      ids.forEach((id) => remove ? n.delete(id) : n.add(id))
+      return n
+    })
+  }
+  const toggleGroup = (group) => {
+    const ids = (group.group_members || []).map((m) => m.user_id)
     if (!ids.length) return
     setSel((s) => {
       const n = new Set(s)
@@ -70,6 +80,7 @@ export default function SendMessageForm({ members }) {
           })}
         </div>
       </div>
+      {groups.length > 0 && <div className="space-y-2"><p className="text-sm font-bold">اختيار حسب المجموعات</p><div className="flex flex-wrap gap-2">{groups.map((g) => <button key={g.id} type="button" disabled={!g.group_members?.length} onClick={() => toggleGroup(g)} className="rounded-full border border-navy/15 px-3 py-1.5 text-sm disabled:opacity-40">{g.name} ({g.group_members?.length || 0})</button>)}</div></div>}
       <input className="input" placeholder="ابحث عن عضو" value={q} onChange={(e) => setQ(e.target.value)} aria-label="بحث" />
       <label className="flex items-center gap-2 text-sm font-bold">
         <input type="checkbox" className="h-5 w-5 accent-[#10265a]" checked={allShown} onChange={toggleAll} /> تحديد الكل ({sel.size} مختار)

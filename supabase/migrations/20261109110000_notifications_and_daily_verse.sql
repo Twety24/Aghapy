@@ -183,7 +183,7 @@ begin
  local_now:=now() at time zone 'Africa/Cairo'; local_day:=local_now::date;
  if local_now::time<time '12:00' then return; end if;
  if exists(select 1 from public.daily_verses where verse_date=local_day) then return; end if;
- select l.* into chosen from public.daily_verse_library l where not exists(select 1 from public.daily_verses d where d.library_id=l.id and d.verse_date>=local_day-365) order by random() limit 1;
+ select l.* into chosen from public.daily_verse_library l where not exists(select 1 from public.daily_verses d where d.library_id=l.id) order by random() limit 1;
  if not found then select * into chosen from public.daily_verse_library order by random() limit 1; end if;
  if not found then return; end if;
  insert into public.daily_verses(library_id,verse_date,reference,verse_text) values(chosen.id,local_day,chosen.reference,chosen.verse_text) returning id into verse_id;

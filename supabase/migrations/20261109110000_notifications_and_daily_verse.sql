@@ -66,7 +66,7 @@ create policy "daily verse saves delete own" on public.daily_verse_saves for del
 grant select,insert,delete on public.daily_verse_saves to authenticated;
 
 alter table public.messages add column if not exists daily_verse_id uuid references public.daily_verses(id);
-alter table public.notifications add constraint notifications_daily_verse_id_fkey foreign key(daily_verse_id) references public.daily_verses(id) on delete cascade;
+do $ begin if not exists(select 1 from pg_constraint where conname='notifications_daily_verse_id_fkey' and conrelid='public.notifications'::regclass) then alter table public.notifications add constraint notifications_daily_verse_id_fkey foreign key(daily_verse_id) references public.daily_verses(id) on delete cascade; end if; end $;
 create index if not exists messages_daily_verse_idx on public.messages(daily_verse_id) where daily_verse_id is not null;
 
 insert into public.daily_verse_library(reference,verse_text) values

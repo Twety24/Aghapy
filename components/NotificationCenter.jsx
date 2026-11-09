@@ -11,10 +11,8 @@ export default function NotificationCenter({items,savedVerseIds,userId}){
  const[saved,setSaved]=useState(()=>new Set(savedVerseIds))
  const[removing,setRemoving]=useState(new Set())
  const[startX,setStartX]=useState(null)
- const[permission,setPermission]=useState('default')
- useEffect(()=>{if('Notification'in window)setPermission(Notification.permission)},[])
  useEffect(()=>{const channel=db.channel('user-notifications-'+userId).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+userId},async payload=>{const{data}=await db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at,daily_verse_id,daily_verses(reference,verse_text)').eq('id',payload.new.id).maybeSingle();if(data){setList(current=>[data,...current.filter(x=>x.id!==data.id)].slice(0,8));if('Notification'in window&&Notification.permission==='granted'){const registration=await navigator.serviceWorker?.ready;registration?.showNotification(data.title,{body:data.body,icon:'/icons/icon-192.png',badge:'/icons/icon-192.png',data:{url:data.href}})}}}).subscribe();return()=>{db.removeChannel(channel)}},[db,userId])
- async function enableNotifications(){if(!('Notification'in window))return;const result=await Notification.requestPermission();setPermission(result);if(result==='granted'){const registration=await navigator.serviceWorker?.ready;registration?.showNotification('تم تفعيل الإشعارات',{body:'هتظهر لك التنبيهات الجديدة أثناء استخدام التطبيق.',icon:'/icons/icon-192.png'})}}
+
  async function dismiss(id){setRemoving(current=>new Set(current).add(id));setTimeout(async()=>{await db.from('notifications').delete().eq('id',id);setList(current=>current.filter(x=>x.id!==id));setRemoving(current=>{const n=new Set(current);n.delete(id);return n});router.refresh()},230)}
  async function openNotification(item){if(!item.read_at){await db.from('notifications').update({read_at:new Date().toISOString()}).eq('id',item.id)}}
  async function toggleSave(verseId){if(!verseId)return;if(saved.has(verseId)){await db.from('daily_verse_saves').delete().eq('user_id',userId).eq('verse_id',verseId);setSaved(current=>{const n=new Set(current);n.delete(verseId);return n})}else{const{error}=await db.from('daily_verse_saves').insert({user_id:userId,verse_id:verseId});if(!error)setSaved(current=>new Set([...current,verseId]))}}

@@ -1,0 +1,2 @@
+import Image from 'next/image'
+export default function DashboardLoading(){return <main className="flex min-h-[calc(100dvh-3rem)] flex-col items-center justify-center gap-5 bg-ice"><Image src="/logo.jpg" alt="Aghapy Team" width={112} height={112} priority className="brand-logo logo-loading"/><p className="text-sm font-bold text-navy/70">Made with ♥ by Youssef Hatem</p></main>}

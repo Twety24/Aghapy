@@ -4,6 +4,10 @@ import { NextResponse } from 'next/server'
 const PUBLIC = ['/login', '/register', '/forgot-password', '/reset-password', '/auth', '/api/cron']
 
 export async function proxy(request) {
+  const path = request.nextUrl.pathname
+  const isPublic = PUBLIC.some((p) => path.startsWith(p))
+  if (isPublic) return NextResponse.next({ request })
+
   let response = NextResponse.next({ request })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -19,12 +23,11 @@ export async function proxy(request) {
       }
     }
   )
-  const { data: { user } } = await supabase.auth.getUser()
-  const path = request.nextUrl.pathname
-  const isPublic = PUBLIC.some((p) => path.startsWith(p))
+  const { data: { claims }, error } = await supabase.auth.getClaims()
+  const userId = !error ? claims?.sub : null
 
-  if (!user && !isPublic) return NextResponse.redirect(new URL('/login', request.url))
-  if (user && (path === '/login' || path === '/register')) return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (!userId) return NextResponse.redirect(new URL('/login', request.url))
+  if (path === '/login' || path === '/register') return NextResponse.redirect(new URL('/dashboard', request.url))
   return response
 }
 

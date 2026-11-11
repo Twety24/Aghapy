@@ -139,12 +139,22 @@ begin
 end;
 $new_user$;
 
+revoke all on function public.is_senior_admin() from public, anon;
+grant execute on function public.is_senior_admin() to authenticated;
+revoke all on function public.is_super_admin() from public, anon;
+grant execute on function public.is_super_admin() to authenticated;
+revoke all on function public.is_admin_chat_group(uuid) from public, anon;
+grant execute on function public.is_admin_chat_group(uuid) to authenticated;
+revoke all on function public.protect_role_changes() from public, anon, authenticated;
+revoke all on function public.sync_admin_chat_membership() from public, anon, authenticated;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
 -- Sensitive contact columns are never readable directly by authenticated clients.
 -- The application serves them through server-side routes after checking admin_level.
 revoke select on table public.profiles from anon, authenticated;
 grant select (
   id, full_name, role, is_active, created_at, avatar_url, age,
-  stage, department, is_root, birth_date
+  stage, department, is_root, admin_level, birth_date
 ) on table public.profiles to authenticated;
 
 -- Suggestions can be assigned to one or more active admins.
@@ -166,6 +176,7 @@ create policy "suggestion recipients assigned read"
   using (admin_id = (select auth.uid()) or (select public.is_super_admin()));
 
 drop policy if exists "suggestions admin read" on public.suggestions;
+drop policy if exists "suggestions insert" on public.suggestions;
 create policy "suggestions assigned admin read"
   on public.suggestions
   for select
@@ -186,13 +197,14 @@ language sql
 security definer
 stable
 set search_path = public
-as $$
+as $
   select p.id, p.full_name
   from public.profiles p
-  where p.role = 'admin'
+  where (select auth.uid()) is not null
+    and p.role = 'admin'
     and p.is_active
   order by p.full_name;
-$$;
+$;
 
 create or replace function public.submit_suggestion(
   p_content text,
@@ -340,6 +352,19 @@ create policy "gm admin delete non-system"
   for delete
   to authenticated
   using (
+    (select public.is_admin())
+    and not (select public.is_admin_chat_group(group_id))
+  );
+drop policy if exists "gm admin update" on public.group_members;
+create policy "gm admin update non-system"
+  on public.group_members
+  for update
+  to authenticated
+  using (
+    (select public.is_admin())
+    and not (select public.is_admin_chat_group(group_id))
+  )
+  with check (
     (select public.is_admin())
     and not (select public.is_admin_chat_group(group_id))
   );

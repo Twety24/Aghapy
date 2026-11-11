@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -12,9 +12,23 @@ export default function SuggestionsPage() {
   const [done, setDone] = useState(false)
   const [busy, setBusy] = useState(false)
 
-  useEffect(() => {
-    createClient().rpc('get_active_suggestion_admins').then(({ data }) => setAdmins(data || []))
+  const loadAdmins = useCallback(async () => {
+    const { data } = await createClient().rpc('get_active_suggestion_admins')
+    const active = data || []
+    setAdmins(active)
+    setSelected(current => current.filter(id => active.some(admin => admin.id === id)))
   }, [])
+
+  useEffect(() => {
+    loadAdmins()
+    const timer = setInterval(loadAdmins, 30000)
+    const refreshOnFocus = () => loadAdmins()
+    window.addEventListener('focus', refreshOnFocus)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('focus', refreshOnFocus)
+    }
+  }, [loadAdmins])
 
   function toggleAdmin(id) {
     setSelected(current => current.includes(id) ? current.filter(x => x !== id) : [...current, id])

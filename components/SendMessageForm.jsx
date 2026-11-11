@@ -26,7 +26,7 @@ export default function SendMessageForm({ members, groups = [] }) {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState({ ok: false, text: '' })
 
-  const shown = useMemo(() => members.filter((m) => (m.full_name + m.email).toLowerCase().includes(q.trim().toLowerCase())), [members, q])
+  const shown = useMemo(() => members.filter((m) => m.full_name.toLowerCase().includes(q.trim().toLowerCase())), [members, q])
   const allShown = shown.length > 0 && shown.every((m) => sel.has(m.id))
   const toggle = (id) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n })
   const toggleCategory = (field, value) => {

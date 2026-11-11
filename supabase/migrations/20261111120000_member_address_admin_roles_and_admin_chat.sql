@@ -197,14 +197,14 @@ language sql
 security definer
 stable
 set search_path = public
-as $
+as $active_admins$
   select p.id, p.full_name
   from public.profiles p
   where (select auth.uid()) is not null
     and p.role = 'admin'
     and p.is_active
   order by p.full_name;
-$;
+$active_admins$;
 
 create or replace function public.submit_suggestion(
   p_content text,

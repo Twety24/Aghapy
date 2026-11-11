@@ -79,8 +79,11 @@ begin
   from public.profiles
   where id = auth.uid();
 
-  if old.is_root or new.is_root is distinct from old.is_root then
+  if new.is_root is distinct from old.is_root then
     raise exception 'صلاحية Super Admin محجوزة للحساب الأساسي فقط';
+  end if;
+  if old.is_root and (new.role is distinct from old.role or new.admin_level is distinct from old.admin_level) then
+    raise exception 'لا يمكن تغيير صلاحيات الحساب الأساسي';
   end if;
 
   if new.role is distinct from old.role
@@ -129,6 +132,11 @@ create index if not exists suggestion_recipients_admin_idx
 
 alter table public.suggestion_recipients enable row level security;
 revoke all on table public.suggestion_recipients from anon, authenticated;
+grant select on table public.suggestion_recipients to authenticated;
+create policy "suggestion recipients assigned read"
+  on public.suggestion_recipients
+  for select to authenticated
+  using (admin_id = (select auth.uid()) or (select public.is_super_admin()));
 
 drop policy if exists "suggestions admin read" on public.suggestions;
 create policy "suggestions assigned admin read"
@@ -267,13 +275,7 @@ begin
   limit 1;
 
   if admin_group_id is null then
-    return coalesce(new, old);
-  end if;
-
-  if tg_op = 'DELETE' then
-    delete from public.group_members
-    where group_id = admin_group_id and user_id = old.id;
-    return old;
+    return new;
   end if;
 
   if new.role = 'admin' and new.is_active then
@@ -291,7 +293,7 @@ $$;
 
 drop trigger if exists sync_admin_chat_membership on public.profiles;
 create trigger sync_admin_chat_membership
-after insert or update of role, is_active, admin_level or delete
+after insert or update of role, is_active, admin_level
 on public.profiles
 for each row execute function public.sync_admin_chat_membership();
 

@@ -369,6 +369,17 @@ create policy "gm admin update non-system"
     and not (select public.is_admin_chat_group(group_id))
   );
 
+-- The system admin group cannot be renamed, reassigned, or deleted by any client admin.
+drop policy if exists "groups admin delete" on public.groups;
+create policy "groups admin delete non-system"
+  on public.groups for delete to authenticated
+  using ((select public.is_admin()) and not is_admin_chat);
+drop policy if exists "groups admin update" on public.groups;
+create policy "groups admin update non-system"
+  on public.groups for update to authenticated
+  using ((select public.is_admin()) and not is_admin_chat)
+  with check ((select public.is_admin()) and not is_admin_chat);
+
 -- Realtime keeps the selectable admin list and admin chat membership current in the UI.
 do $$
 begin

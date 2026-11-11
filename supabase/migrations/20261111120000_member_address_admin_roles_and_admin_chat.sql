@@ -228,8 +228,8 @@ begin
     raise exception 'الاقتراح يجب أن يكون بين 5 و2000 حرف';
   end if;
 
-  select count(distinct x) into requested_count
-  from unnest(coalesce(p_admin_ids, array[]::uuid[])) as x;
+  select count(distinct requested_admin_id) into requested_count
+  from unnest(coalesce(p_admin_ids, array[]::uuid[])) as requested(requested_admin_id);
 
   select count(distinct p.id) into valid_count
   from public.profiles p

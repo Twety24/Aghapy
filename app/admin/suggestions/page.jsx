@@ -8,11 +8,9 @@ export default async function Suggestions() {
   const context = await getAdminContext()
   if (!context) return null
   const db = await createClient()
-  let query = db.from('suggestions')
-    .select('id, content, created_at, is_anonymous, profiles(full_name), suggestion_recipients!inner(admin_id)')
+  const { data } = await db.from('suggestions')
+    .select('id, content, created_at, is_anonymous, profiles(full_name)')
     .order('created_at', { ascending: false })
-  if (!context.profile.is_root) query = query.eq('suggestion_recipients.admin_id', context.user.id)
-  const { data } = await query
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <h1 className="text-2xl font-bold">المقترحات ({data?.length || 0})</h1>
@@ -24,7 +22,7 @@ export default async function Suggestions() {
           </p>
         </article>
       ))}
-      {!data?.length && <p className="rounded-xl bg-white p-6 text-center text-navy/60">مفيش مقترحات موجهة ليك لسه.</p>}
+      {!data?.length && <p className="rounded-xl bg-white p-6 text-center text-navy/60">مفيش مقترحات لسه.</p>}
     </div>
   )
 }

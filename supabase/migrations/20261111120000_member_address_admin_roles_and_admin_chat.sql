@@ -135,7 +135,7 @@ begin
 revoke select on table public.profiles from anon, authenticated;
 grant select (
   id, full_name, role, is_active, created_at, avatar_url, age,
-  stage, department, is_root, birth_date
+  stage, department, is_root, admin_level, birth_date
 ) on table public.profiles to authenticated;
 
 -- Suggestions can be assigned to one or more active admins.

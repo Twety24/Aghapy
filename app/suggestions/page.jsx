@@ -1,7 +1,6 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function SuggestionsPage() {
   const [admins, setAdmins] = useState([])
@@ -13,8 +12,9 @@ export default function SuggestionsPage() {
   const [busy, setBusy] = useState(false)
 
   const loadAdmins = useCallback(async () => {
-    const { data } = await createClient().rpc('get_active_suggestion_admins')
-    const active = data || []
+    const response = await fetch('/api/suggestions/admins', { cache: 'no-store' })
+    const result = await response.json().catch(() => ({}))
+    const active = response.ok ? (result.admins || []) : []
     setAdmins(active)
     setSelected(current => current.filter(id => active.some(admin => admin.id === id)))
   }, [])
@@ -40,13 +40,14 @@ export default function SuggestionsPage() {
     if (content.trim().length < 5) return setError('اكتب اقتراحك بشكل أوضح شوية.')
     if (!selected.length) return setError('اختار مسؤول واحد على الأقل عشان يستلم اقتراحك.')
     setBusy(true)
-    const { error: submitError } = await createClient().rpc('submit_suggestion', {
-      p_content: content.trim(),
-      p_is_anonymous: anon,
-      p_admin_ids: selected
+    const response = await fetch('/api/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content.trim(), isAnonymous: anon, adminIds: selected })
     })
+    const result = await response.json().catch(() => ({}))
     setBusy(false)
-    if (submitError) return setError('ماقدرناش نبعت الاقتراح. حدّث الصفحة وحاول تاني.')
+    if (!response.ok) return setError(result.message || 'ماقدرناش نبعت الاقتراح. حدّث الصفحة وحاول تاني.')
     setContent('')
     setSelected([])
     setDone(true)

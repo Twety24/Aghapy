@@ -93,7 +93,7 @@ export default function MembersManager() {
             <button className={btn} disabled={busyId === m.id} onClick={() => rename(m)}>تعديل الاسم</button>
             <button className={btn} disabled={busyId === m.id} onClick={() => history(m.id)}>سجل الحضور</button>
             {m.role === 'member' && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'promote-normal')}>ترقية لأدمن عادي</button>}
-            {permissions.isRoot && m.role === 'member' && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'promote-senior')}>ترقية لأدمن متوسط</button>}
+            {permissions.isRoot && (m.role === 'member' || (m.role === 'admin' && m.admin_level === 'admin')) && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'promote-senior')}>ترقية لأدمن متوسط</button>}
             {permissions.isRoot && m.role === 'admin' && !m.is_root && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'demote')}>إزالة صلاحية الأدمن</button>}
             {m.role === 'member' && m.id !== permissions.userId && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'toggle-active')}>{m.is_active ? 'إيقاف' : 'تفعيل'}</button>}
           </div>

@@ -143,10 +143,7 @@ revoke all on function public.is_senior_admin() from public, anon;
 grant execute on function public.is_senior_admin() to authenticated;
 revoke all on function public.is_super_admin() from public, anon;
 grant execute on function public.is_super_admin() to authenticated;
-revoke all on function public.is_admin_chat_group(uuid) from public, anon;
-grant execute on function public.is_admin_chat_group(uuid) to authenticated;
 revoke all on function public.protect_role_changes() from public, anon, authenticated;
-revoke all on function public.sync_admin_chat_membership() from public, anon, authenticated;
 revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 -- Sensitive contact columns are never readable directly by authenticated clients.
@@ -298,6 +295,9 @@ as $$
     where id = p_group_id and is_admin_chat
   );
 $$;
+revoke all on function public.is_admin_chat_group(uuid) from public, anon;
+grant execute on function public.is_admin_chat_group(uuid) to authenticated;
+
 
 create or replace function public.sync_admin_chat_membership()
 returns trigger
@@ -329,6 +329,8 @@ begin
   return new;
 end;
 $$;
+revoke all on function public.sync_admin_chat_membership() from public, anon, authenticated;
+
 
 drop trigger if exists sync_admin_chat_membership on public.profiles;
 create trigger sync_admin_chat_membership

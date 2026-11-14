@@ -23,8 +23,8 @@ export async function proxy(request) {
       }
     }
   )
-  const { data: { claims }, error } = await supabase.auth.getClaims()
-  const userId = !error ? claims?.sub : null
+  const { data, error } = await supabase.auth.getClaims()
+  const userId = !error ? data?.claims?.sub : null
 
   if (!userId) return NextResponse.redirect(new URL('/login', request.url))
   if (path === '/login' || path === '/register') return NextResponse.redirect(new URL('/dashboard', request.url))

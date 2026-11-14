@@ -14,6 +14,8 @@ export default function ProfileForm({ profile, email }) {
   const [preview, setPreview] = useState(profile.avatar_url || '')
   async function save(e) {
     e.preventDefault()
+    if (photo && !['image/jpeg', 'image/png', 'image/webp'].includes(photo.type)) { setMsg('نوع الصورة غير مدعوم. استخدم JPG أو PNG أو WebP.'); return }
+    if (photo && photo.size > 5 * 1024 * 1024) { setMsg('حجم الصورة لازم يكون 5 ميجابايت أو أقل.'); return }
     setBusy(true)
     setMsg('')
     let avatar_url = profile.avatar_url || null

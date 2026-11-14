@@ -1,12 +1,21 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-const PUBLIC = ['/login', '/register', '/forgot-password', '/reset-password', '/auth', '/api/cron']
+const PUBLIC = ['/login', '/register', '/forgot-password', '/reset-password', '/auth']
+
+function withCookies(url, response) {
+  const redirect = NextResponse.redirect(url)
+  response.cookies.getAll().forEach(cookie => redirect.cookies.set(cookie))
+  return redirect
+}
 
 export async function proxy(request) {
   const path = request.nextUrl.pathname
-  const isPublic = PUBLIC.some((p) => path.startsWith(p))
-  if (isPublic) return NextResponse.next({ request })
+  const isCron = path === '/api/cron' || path.startsWith('/api/cron/')
+  const isPublic = PUBLIC.some(p => path === p || path.startsWith(p + '/'))
+  const isAuthPage = path === '/login' || path === '/register'
+
+  if (isCron) return NextResponse.next({ request })
 
   let response = NextResponse.next({ request })
   const supabase = createServerClient(
@@ -26,8 +35,12 @@ export async function proxy(request) {
   const { data, error } = await supabase.auth.getClaims()
   const userId = !error ? data?.claims?.sub : null
 
-  if (!userId) return NextResponse.redirect(new URL('/login', request.url))
-  if (path === '/login' || path === '/register') return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (!userId) {
+    if (isPublic) return response
+    return withCookies(new URL('/login', request.url), response)
+  }
+
+  if (isAuthPage) return withCookies(new URL('/dashboard', request.url), response)
   return response
 }
 

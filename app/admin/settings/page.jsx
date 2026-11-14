@@ -14,7 +14,7 @@ export default async function Page() {
     db.from('settings').select('value').eq('key', 'admin_report_email').maybeSingle(),
     db.from('profiles').select('id, full_name').eq('role', 'admin').eq('is_active', true)
   ])
-  const checks = [['مفتاح الإيميل (Resend)', !!process.env.RESEND_API_KEY], ['كلمة سر القفل التلقائي', !!process.env.CRON_SECRET]]
+  const checks = [['مفتاح الإيميل (Resend)', !!process.env.RESEND_API_KEY], ['بريد إرسال من دومين موثّق (MAIL_FROM)', !!process.env.MAIL_FROM], ['بريد استقبال التقارير', !!settings?.value?.trim()], ['كلمة سر القفل التلقائي', !!process.env.CRON_SECRET]]
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">الإعدادات</h1>

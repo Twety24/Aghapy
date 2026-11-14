@@ -4,7 +4,7 @@ create or replace function private.create_user_notification(
   p_title text,
   p_body text,
   p_href text,
-  p_source_id uuid,
+  p_source_id uuid default null,
   p_daily_verse_id uuid default null
 )
 returns void

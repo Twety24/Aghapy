@@ -2,8 +2,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import jsQR from 'jsqr'
+import {useT} from '@/components/LangProvider'
 
 export default function ScanPage() {
+  const {lang}=useT();const en=lang==='en';const c=en?{title:'Attendance check-in',hint:'Point your camera at the QR code displayed by the session administrator.',camera:'We need camera access to scan the code. Enable camera permissions for this website in your browser settings, then try again.',retry:'Try again',opening:'Opening camera...',success:'Done',scanAgain:'Scan again'}:{title:'تسجيل الحضور',hint:'{c.hint}',camera:'{c.camera}',retry:'جرّب تاني',opening:'{c.opening}',success:'تمام',scanAgain:'امسح تاني'};
   const video = useRef(null)
   const stream = useRef(null)
   const busy = useRef(false)
@@ -53,8 +55,8 @@ export default function ScanPage() {
 
   return (
     <main className="mx-auto min-h-dvh max-w-md bg-navy px-5 py-6 text-white">
-      <Link href="/dashboard" className="text-sm text-sky underline">رجوع</Link>
-      <h1 className="mt-4 text-2xl font-bold">تسجيل الحضور</h1>
+      <Link href="/dashboard" className="text-sm text-sky underline"{en?'Back':'رجوع'}</Link>
+      <h1 className="mt-4 text-2xl font-bold"{c.title}</h1>
 
       {state !== 'done' && state !== 'denied' && (
         <>
@@ -69,7 +71,7 @@ export default function ScanPage() {
       {state === 'denied' && (
         <div className="mt-6 space-y-4 rounded-2xl bg-white p-5 text-navy">
           <p>محتاجين إذن الكاميرا عشان نمسح الكود. فعّله من إعدادات المتصفح للموقع ده، وبعدين جرّب تاني.</p>
-          <button className="btn btn-red" onClick={start}>جرّب تاني</button>
+          <button className="btn btn-red" onClick={start}{c.retry}</button>
         </div>
       )}
 
@@ -77,7 +79,7 @@ export default function ScanPage() {
         <div className="mt-6 space-y-4 rounded-2xl bg-white p-6 text-center text-navy" role="status">
           <p className={`text-5xl ${ok ? 'text-green-600' : 'text-stage'}`} aria-hidden="true">{ok ? '✓' : '✕'}</p>
           <p className="text-lg font-bold">{result.message}</p>
-          {ok ? <Link href="/dashboard" className="btn btn-navy">تمام</Link> : <button className="btn btn-red" onClick={start}>امسح تاني</button>}
+          {ok ? <Link href="/dashboard" className="btn btn-navy">{c.success}</Link> : <button className="btn btn-red" onClick={start}>{c.scanAgain}</button>}
         </div>
       )}
     </main>

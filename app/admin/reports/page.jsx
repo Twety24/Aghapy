@@ -40,7 +40,7 @@ export default async function Page() {
         {session.status === 'closed' && <div className="mt-3 flex flex-wrap items-center gap-2">
           {['present','absent'].map(kind => {
             const file = files.find(item => item.kind === kind)
-            return file ? <a key={kind} href={`/api/admin/reports/download?id=${file.id}`} className="rounded-lg bg-navy px-3 py-2 text-sm font-bold text-white">{kind === 'present' ? en?'Download present':'Download absent'}</a> : null
+            return file ? <a key={kind} href={`/api/admin/reports/download?id=${file.id}`} className="rounded-lg bg-navy px-3 py-2 text-sm font-bold text-white">{en ? (kind === 'present' ? 'Download present' : 'Download absent') : (kind === 'present' ? 'تنزيل الحاضرين' : 'تنزيل الغايبين')}</a> : null
           })}
           {files.length === 2 && <ResendButton sessionId={session.id} />}
         </div>}

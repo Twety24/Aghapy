@@ -39,3 +39,5 @@ html[data-theme='dark'] .site-footer{color:#aab6c8;border-color:rgb(148 163 184 
 @keyframes skeleton-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 html[data-theme='dark'] .skeleton-block{background:linear-gradient(100deg,#263449 20%,#3a4a61 45%,#263449 70%);background-size:200% 100%;}
 @media(prefers-reduced-motion:reduce){.skeleton-block{animation:none;background:#e2e8f0}html[data-theme='dark'] .skeleton-block{background:#263449}}
+
+/* Accessible language and appearance controls */

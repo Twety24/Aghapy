@@ -36,14 +36,14 @@ export default async function Dashboard() {
   const menu = [['/scan', 'home.scan'], ...cards.map(([href, key]) => [href, key]), ['/profile', 'nav.profile'], ...(profile?.role === 'admin' ? [['/admin', 'nav.admin']] : [])]
 
   return (
-    <div className="min-h-[calc(100dvh-3.25rem)] bg-ice">
+    <div className="min-h-[calc(100dvh-4.25rem)] bg-ice">
       <header className="bg-navy px-4 pb-20 pt-3 text-white">
         <div className="mx-auto flex max-w-md items-center justify-between gap-3">
           <HomeMenu links={menu} signOut={signOut} />
           <Toggles className="text-white" />
         </div>
       </header>
-      <main className="mx-auto -mt-16 max-w-md space-y-3 px-4 pb-4">
+      <main className="mx-auto -mt-16 max-w-md space-y-3 px-4 pb-3">
         <section className="text-center">
           <AvatarImage src={profile?.avatar_url} alt="الصورة الشخصية" className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-white object-cover shadow-md" />
           <h1 className="mt-2 text-xl font-bold">{t('home.hi', { name: first })}</h1>

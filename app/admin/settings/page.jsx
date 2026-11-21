@@ -42,7 +42,7 @@ export default async function Page({searchParams}) {
       <h1 className="text-2xl font-bold">الإعدادات</h1>
       <SettingsForm initial={settings?.value || ''} />
       <GmailConnectButton connected={!!gmail} email={gmail?.gmail_address}/>
-      {params?.gmail&&statusText[params.gmail]&&<p className={params.gmail==='connected'?'alert-ok':'alert-error'} role="status">{messages[params.gmail]}</p>}
+      {params?.gmail&&statusText[params.gmail]&&<p className={params.gmail==='connected'?'alert-ok':'alert-error'} role="status">{statusText[params.gmail]}</p>}
       <StorageCleanupButton />
       <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
         <h2 className="font-bold">حالة إعداد إرسال التقارير</h2>

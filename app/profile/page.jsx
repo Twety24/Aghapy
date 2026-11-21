@@ -9,5 +9,5 @@ export default async function Page() {
   if (!user) redirect('/login')
   const { data: profile } = await createAdminClient().from('profiles').select('id,full_name,phone,address,age,birth_date,stage,department,avatar_url').eq('id', user.id).single()
   if (!profile) redirect('/dashboard')
-  return <ProfileForm profile={profile} email={user.email} />
+  return <ProfileForm profile={profile} email={user.email} addressRequired={!profile.address?.trim()} />
 }

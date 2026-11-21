@@ -91,10 +91,10 @@ export default function MembersManager() {
             <p>{c.department}: <b>{en ? ({acting:'Acting',scenography:'Scenography',media:'Media',music_prep:'Music preparation',other:'Other'}[m.department]||c.undefined) : (DEPT[m.department]||c.undefined)}</b></p>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button className={btn} disabled={busyId === m.id} onClick={() => rename(m)}{c.edit}</button>
-            <button className={btn} disabled={busyId === m.id} onClick={() => history(m.id)}{c.history}</button>
-            {m.role === 'member' && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'promote-normal')}{c.promote}</button>}
-            {m.role === 'admin' && !m.is_root && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'demote')}{c.demote}</button>}
+            <button className={btn} disabled={busyId === m.id} onClick={() => rename(m)}>{c.edit}</button>
+            <button className={btn} disabled={busyId === m.id} onClick={() => history(m.id)}>{c.history}</button>
+            {m.role === 'member' && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'promote-normal')}>{c.promote}</button>}
+            {m.role === 'admin' && !m.is_root && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'demote')}>{c.demote}</button>}
             {m.role === 'member' && m.id !== permissions.userId && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'toggle-active')}>{m.is_active ? c.disable : c.enable}</button>}
           </div>
           {openId === m.id && <ul className="mt-3 space-y-1 border-t border-navy/10 pt-3 text-sm">{hist.map((h, i) => <li key={i} className="flex justify-between"><span>{h.date}</span><span className={h.status === 'present' ? 'text-green-700' : 'text-stage'}>{h.status === 'present' ? c.present : c.absent}</span></li>)}{!hist.length && <li className="text-navy/60">مفيش سجل لسه.</li>}</ul>}

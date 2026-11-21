@@ -62,8 +62,8 @@ export default function MembersManager() {
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold"{c.members} ({rows.length})</h1>
-        <a href="/api/admin/members/export" className="rounded-lg bg-navy px-4 py-2 text-sm font-bold text-white"{c.export}</a>
+        <h1 className="text-2xl font-bold">{c.members} ({rows.length})</h1>
+        <a href="/api/admin/members/export" className="rounded-lg bg-navy px-4 py-2 text-sm font-bold text-white">{c.export}</a>
       </div>
       <input className="input" placeholder={c.search} value={q} onChange={(e) => setQ(e.target.value)} aria-label={c.search} />
       <p className="rounded-xl bg-white p-3 text-sm text-navy/70 ring-1 ring-navy/10">
@@ -78,7 +78,7 @@ export default function MembersManager() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-bold">{m.full_name}</span>
                 {m.role === 'admin' && <span className="rounded-full bg-navy px-2 py-0.5 text-xs text-white">{m.is_root ? 'Super Admin' : c.administrator}</span>}
-                {!m.is_active && <span className="rounded-full bg-stage px-2 py-0.5 text-xs text-white"{c.suspended}</span>}
+                {!m.is_active && <span className="rounded-full bg-stage px-2 py-0.5 text-xs text-white">{c.suspended}</span>}
               </div>
               <p className="text-sm text-navy/60" dir="ltr" style={{ textAlign: 'right' }}>{m.email || '—'}</p>
             </div>

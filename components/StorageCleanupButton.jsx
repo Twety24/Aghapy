@@ -20,7 +20,7 @@ export default function StorageCleanupButton(){
     setBusy(false)
   }
   return <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
-    <h2 className="font-bold"{c.title}</h2>
+    <h2 className="font-bold">{c.title}</h2>
     <p className="mt-1 text-sm text-navy/60">يحذف الملفات التي لا ترتبط بأي صورة أو عضو أو محتوى اجتماع أو تقرير، ويحافظ على الملفات المستخدمة.</p>
     <button type="button" className="btn btn-red mt-3" disabled={busy} onClick={clean}>{busy?c.busy:c.button}</button>
     {msg&&<p className="mt-2 text-sm" role="status">{msg}</p>}

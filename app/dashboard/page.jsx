@@ -25,7 +25,7 @@ export default async function Dashboard(){
  if(profile?.address==null||!profile.address.trim())redirect('/profile?complete=address')
  if(profile&&!profile.is_active)return <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center"><p className="alert-error">Account suspended. Contact the administrator.</p><form action={signOut}><button className="btn btn-navy">{t('common.logout')}</button></form></main>
  const first=(profile?.full_name||'').split(' ')[0]
- const cards=[['/messages','nav.messages','messages'],['/photos','nav.photos','photos'],['/meeting','nav.meeting','meeting'],['/excuse','nav.excuse','excuse'],['/suggestions','nav.suggestions','suggestions'],['/chats','nav.chats','chats']]
+ const cards=[['/messages','nav.messages','notifications'],['/photos','nav.photos','photos'],['/meeting','nav.meeting','meeting'],['/excuse','nav.excuse','excuse'],['/suggestions','nav.suggestions','suggestions'],['/chats','nav.chats','chats']]
  const menu=[['/scan','home.scan'],...cards.map(([href,key])=>[href,key]),['/profile','nav.profile'],...(profile?.role==='admin'?[['/admin','nav.admin']]:[])]
  return <div className="min-h-[calc(100dvh-3.25rem)] bg-ice">
   <header className="bg-navy px-4 pb-20 pt-3 text-white"><div className="mx-auto flex max-w-md items-center justify-between"><HomeMenu links={menu} signOut={signOut}/><div className="flex items-center gap-3"><Toggles className="text-sky"/><span className="h-8 w-px bg-white/20"/></div></div></header>

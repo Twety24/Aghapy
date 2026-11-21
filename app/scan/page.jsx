@@ -55,8 +55,8 @@ export default function ScanPage() {
 
   return (
     <main className="mx-auto min-h-dvh max-w-md bg-navy px-5 py-6 text-white">
-      <Link href="/dashboard" className="text-sm text-sky underline"{en?'Back':'رجوع'}</Link>
-      <h1 className="mt-4 text-2xl font-bold"{c.title}</h1>
+      <Link href="/dashboard" className="text-sm text-sky underline">{en?'Back':'رجوع'}</Link>
+      <h1 className="mt-4 text-2xl font-bold">{c.title}</h1>
 
       {state !== 'done' && state !== 'denied' && (
         <>

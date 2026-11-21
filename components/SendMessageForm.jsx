@@ -62,7 +62,7 @@ export default function SendMessageForm({ members, groups = [] }) {
     const { error } = await createClient().rpc('send_message', { p_title: title, p_body: body, p_user_ids: [...sel] })
     setBusy(false)
     if (error) return setMsg({ ok: false, text: copy.failed })
-    setMsg({ ok: true, text: `اتبعتت لـ ${sel.size} عضو.` }); setTitle(''); setBody(''); setSel(new Set()); router.refresh()
+    setMsg({ ok: true, text: copy.sent }); setTitle(''); setBody(''); setSel(new Set()); router.refresh()
   }
 
   return (
@@ -84,7 +84,7 @@ export default function SendMessageForm({ members, groups = [] }) {
           })}
         </div>
       </div>
-      {groups.length > 0 && <div className="space-y-2"><p className="text-sm font-bold">اختيار حسب المجموعات</p><div className="flex flex-wrap gap-2">{groups.map((g) => <button key={g.id} type="button" disabled={!g.group_members?.length} onClick={() => toggleGroup(g)} className="rounded-full border border-navy/15 px-3 py-1.5 text-sm disabled:opacity-40">{g.name} ({g.group_members?.length || 0})</button>)}</div></div>}
+      {groups.length > 0 && <div className="space-y-2"><p className="text-sm font-bold">{copy.groups}</p><div className="flex flex-wrap gap-2">{groups.map((g) => <button key={g.id} type="button" disabled={!g.group_members?.length} onClick={() => toggleGroup(g)} className="rounded-full border border-navy/15 px-3 py-1.5 text-sm disabled:opacity-40">{g.name} ({g.group_members?.length || 0})</button>)}</div></div>}
       <input className="input" placeholder={copy.search} value={q} onChange={(e) => setQ(e.target.value)} aria-label={copy.search} />
       <label className="flex items-center gap-2 text-sm font-bold">
         <input type="checkbox" className="h-5 w-5 accent-[#10265a]" checked={allShown} onChange={toggleAll} /> {copy.all} ({sel.size} {copy.selected})

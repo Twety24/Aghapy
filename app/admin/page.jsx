@@ -25,7 +25,7 @@ export default async function Overview() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold"{en?'Overview':'نظرة عامة'}</h1>
+      <h1 className="text-2xl font-bold">{en?'Overview':'نظرة عامة'}</h1>
       <p className="text-sm text-navy/60">{s ? `${en?'Last session':'آخر اجتماع'}: ${s.meeting_date} (${s.status === 'open' ? (en?'Open':'مفتوح') : (en?'Closed':'مقفول')})` : (en?'No sessions yet.':'مفيش اجتماعات لسه.')}</p>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <Stat label={en?"Registered members":"الأعضاء المسجّلين"} value={total ?? 0} />
@@ -36,14 +36,14 @@ export default async function Overview() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
-          <h2 className="font-bold"{en?'Recent attendance':'آخر تسجيلات الحضور'}</h2>
+          <h2 className="font-bold">{en?'Recent attendance':'آخر تسجيلات الحضور'}</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {(recent || []).map((r, i) => <li key={i} className="flex justify-between"><span>{r.full_name}</span><span className="text-navy/60">{fmt(r.checked_in_at)}</span></li>)}
             {!recent?.length && <li className="text-navy/60">{en?'Nothing yet.':'لسه مفيش.'}</li>}
           </ul>
         </section>
         <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
-          <h2 className="font-bold"{en?'Recent suggestions':'آخر المقترحات'}</h2>
+          <h2 className="font-bold">{en?'Recent suggestions':'آخر المقترحات'}</h2>
           <ul className="mt-3 space-y-3 text-sm">
             {(recentSugg || []).map((r, i) => <li key={i}><p className="line-clamp-2">{r.content}</p><p className="text-navy/60">{r.is_anonymous ? (en?'Anonymous':'مجهول') : one(r.profiles)?.full_name} · {fmt(r.created_at)}</p></li>)}
             {!recentSugg?.length && <li className="text-navy/60">لسه مفيش.</li>}

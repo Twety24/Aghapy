@@ -19,7 +19,7 @@ export default async function Page() {
   const filesBySession = group(reports, 'session_id')
   const logsBySession = group(logs, 'session_id')
   return <div className="mx-auto max-w-4xl space-y-4">
-    <h1 className="text-2xl font-bold"{en?'Reports and attendance history':'التقارير وسجل الحضور'}</h1>
+    <h1 className="text-2xl font-bold">{en?'Reports and attendance history':'التقارير وسجل الحضور'}</h1>
     {(sessions || []).map(session => {
       const rows = bySession[session.id] || []
       const files = filesBySession[session.id] || []
@@ -46,10 +46,10 @@ export default async function Page() {
         </div>}
         {session.status === 'closed' && <p className={`mt-2 text-sm ${last?.status === 'failed' ? 'text-stage' : 'text-navy/70'}`}>{en?'Email:':'الإيميل:'} {emailStatus}</p>}
         <details className="mt-3 text-sm">
-          <summary className="cursor-pointer font-medium"{en?'Names':'الأسماء'}</summary>
+          <summary className="cursor-pointer font-medium">{en?'Names':'الأسماء'}</summary>
           <div className="mt-2 grid gap-3 md:grid-cols-2">
-            <div><p className="font-bold text-green-700"{en?'Present':'حاضرين'}</p>{present.map((row, index) => <p key={index}>{row.full_name}</p>)}</div>
-            <div><p className="font-bold text-stage"{en?'Absent':'غايبين'}</p>{absent.map((row, index) => <p key={index}>{row.full_name}</p>)}</div>
+            <div><p className="font-bold text-green-700">{en?'Present':'حاضرين'}</p>{present.map((row, index) => <p key={index}>{row.full_name}</p>)}</div>
+            <div><p className="font-bold text-stage">{en?'Absent':'غايبين'}</p>{absent.map((row, index) => <p key={index}>{row.full_name}</p>)}</div>
           </div>
         </details>
       </article>

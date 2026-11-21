@@ -14,6 +14,7 @@ export default function ProfileForm({ profile, email }) {
   const [preview, setPreview] = useState(profile.avatar_url || '')
   async function save(e) {
     e.preventDefault()
+    if (form.address.trim().length < 5) { setMsg('اكتب عنوانك بالتفصيل.'); return }
     if (form.birth_date) {
       const birthDate = new Date(form.birth_date + 'T00:00:00')
       const today = new Date()
@@ -33,7 +34,7 @@ export default function ProfileForm({ profile, email }) {
       if (up.error) { setBusy(false); setMsg('فشل رفع الصورة. جرّب صورة تانية.'); return }
       avatar_url = db.storage.from('avatars').getPublicUrl(path).data.publicUrl
     }
-    const { error } = await db.from('profiles').update({ full_name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim() || null, birth_date: form.birth_date || null, stage: form.stage, department: form.department, avatar_url }).eq('id', profile.id)
+    const { error } = await db.from('profiles').update({ full_name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim(), birth_date: form.birth_date || null, stage: form.stage, department: form.department, avatar_url }).eq('id', profile.id)
     if (error) {
       if (photo && avatar_url) {
         const path = avatar_url.split('/avatars/')[1]
@@ -59,7 +60,7 @@ export default function ProfileForm({ profile, email }) {
       </div>
       <div><label className="label">الاسم بالكامل</label><input className="input" required value={form.name} onChange={set('name')} /></div>
       <div><label className="label">رقم التليفون</label><input className="input" dir="ltr" type="tel" required value={form.phone} onChange={set('phone')} /></div>
-      <div><label className="label">العنوان</label><textarea className="input min-h-20" maxLength={300} value={form.address} onChange={set('address')} placeholder="اكتب عنوانك بالتفصيل" /></div>
+      <div><label className="label">العنوان <span className="text-red-600">*</span></label><textarea className="input min-h-20" required minLength={5} maxLength={300} value={form.address} onChange={set('address')} placeholder="اكتب عنوانك بالتفصيل" /><p className="mt-1 text-xs text-navy/50">العنوان مطلوب لحفظ بياناتك.</p></div>
       <div><label className="label">تاريخ الميلاد</label><input className="input" type="date" max={new Date().toISOString().slice(0,10)} value={form.birth_date} onChange={set('birth_date')} /><p className="mt-1 text-xs text-navy/50">تاريخ الميلاد اللي سجلته وقت إنشاء الحساب.</p></div>
       <div><label className="label">المرحلة</label><select className="input" value={form.stage} onChange={set('stage')}><option value="">اختار</option><option value="prep">إعدادي</option><option value="secondary">ثانوي</option><option value="university">جامعة</option><option value="graduated">خريج</option></select></div>
       <div><label className="label">القسم</label><select className="input" value={form.department} onChange={set('department')}><option value="">اختار</option>{departments.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></div>

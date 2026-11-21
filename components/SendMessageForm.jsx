@@ -57,13 +57,13 @@ export default function SendMessageForm({ members, groups = [] }) {
     setBusy(true); setMsg({ ok: false, text: '' })
     const { error } = await createClient().rpc('send_message', { p_title: title, p_body: body, p_user_ids: [...sel] })
     setBusy(false)
-    if (error) return setMsg({ ok: false, text: 'ماقدرناش نبعت الرسالة. اتأكد إن العنوان والنص مكتوبين.' })
+    if (error) return setMsg({ ok: false, text: 'ماقدرناش نبعت التنبيه. اتأكد إن العنوان والنص مكتوبين.' })
     setMsg({ ok: true, text: `اتبعتت لـ ${sel.size} عضو.` }); setTitle(''); setBody(''); setSel(new Set()); router.refresh()
   }
 
   return (
     <form onSubmit={send} className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-navy/10">
-      <h2 className="font-bold">رسالة جديدة</h2>
+      <h2 className="font-bold">تنبيه جديدة</h2>
       <div className="space-y-2">
         <p className="text-sm font-bold">اختيار سريع حسب المرحلة</p>
         <div className="flex flex-wrap gap-2">
@@ -92,8 +92,8 @@ export default function SendMessageForm({ members, groups = [] }) {
           </label></li>
         ))}
       </ul>
-      <input className="input" required placeholder="عنوان الرسالة" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <textarea className="input min-h-32" required placeholder="نص الرسالة" value={body} onChange={(e) => setBody(e.target.value)} />
+      <input className="input" required placeholder="عنوان التنبيه" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <textarea className="input min-h-32" required placeholder="محتوى التنبيه" value={body} onChange={(e) => setBody(e.target.value)} />
       {msg.text && <p className={msg.ok ? 'alert-ok' : 'alert-error'} role="status">{msg.text}</p>}
       <button className="btn btn-red" disabled={busy}>{busy ? 'جاري الإرسال...' : 'إرسال'}</button>
     </form>

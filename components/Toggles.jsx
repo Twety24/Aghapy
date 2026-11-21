@@ -16,11 +16,11 @@ export default function Toggles({ className = '' }) {
   }
 
   return (
-    <div className={`flex shrink-0 items-center gap-2 sm:gap-3 ${className}`}>
+    <div className={`flex shrink-0 items-center gap-2 ${className}`}>
       <button
         type="button"
         onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-        className="inline-flex min-h-14 min-w-24 items-center justify-center rounded-xl border border-current/30 px-5 py-3 text-base font-bold transition hover:bg-current/10 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="inline-flex min-h-10 min-w-16 items-center justify-center rounded-lg border border-current/30 px-3 py-2 text-sm font-bold transition hover:bg-current/10 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         aria-label={lang === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
       >
         {lang === 'ar' ? 'EN' : 'عربي'}
@@ -28,7 +28,7 @@ export default function Toggles({ className = '' }) {
       <button
         type="button"
         onClick={toggleTheme}
-        className="inline-flex min-h-14 min-w-14 items-center justify-center rounded-xl border border-current/30 px-4 py-3 text-2xl transition hover:bg-current/10 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-current/30 px-2 py-2 text-xl transition hover:bg-current/10 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
       >

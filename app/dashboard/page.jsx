@@ -17,10 +17,11 @@ export default async function Dashboard(){
  const{data:{user}}=await db.auth.getUser()
  if(!user)redirect('/login')
  const[{data:profile},{data:notifications},{data:notificationPreference}]=await Promise.all([
-  db.from('profiles').select('full_name,role,is_active,avatar_url').eq('id',user.id).single(),
+  db.from('profiles').select('full_name,role,is_active,avatar_url,address').eq('id',user.id).single(),
   db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at').eq('user_id',user.id).is('dismissed_at',null).order('created_at',{ascending:false}).limit(8),
   db.from('notification_preferences').select('device_notifications_enabled').eq('user_id',user.id).maybeSingle()
  ])
+ if(profile?.address==null||!profile.address.trim())redirect('/profile?complete=address')
  if(profile&&!profile.is_active)return <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center"><p className="alert-error">Account suspended. Contact the administrator.</p><form action={signOut}><button className="btn btn-navy">{t('common.logout')}</button></form></main>
  const first=(profile?.full_name||'').split(' ')[0]
  const cards=[['/messages','nav.messages','messages'],['/photos','nav.photos','photos'],['/meeting','nav.meeting','meeting'],['/excuse','nav.excuse','excuse'],['/suggestions','nav.suggestions','suggestions'],['/chats','nav.chats','chats']]

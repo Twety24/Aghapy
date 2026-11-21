@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 const departments = [['acting','تمثيل'],['scenography','سينغرافيا'],['media','ميديا'],['music_prep','إعداد موسيقى'],['other','أخرى']]
-export default function ProfileForm({ profile, email }) {
+export default function ProfileForm({ profile, email, addressRequired = false }) {
   const router = useRouter()
   const [db] = useState(() => createClient())
   const [form, setForm] = useState({ name: profile.full_name || '', phone: profile.phone || '', address: profile.address || '', birth_date: profile.birth_date || '', stage: profile.stage || '', department: profile.department || '' })
@@ -46,13 +46,15 @@ export default function ProfileForm({ profile, email }) {
     }
     setBusy(false)
     setMsg('تم حفظ بياناتك وصورتك.')
-    router.refresh()
+    if (addressRequired) router.replace('/dashboard')
+    else router.refresh()
   }
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
   return <main className="mx-auto min-h-dvh max-w-md bg-white px-5 py-6">
     <Link href="/dashboard" className="text-sm underline">رجوع</Link>
     <h1 className="mt-4 text-2xl font-bold">بياناتي</h1>
     <p className="mt-2 text-sm text-navy/60" dir="ltr">{email}</p>
+    {addressRequired && <p className="alert-error mt-4" role="alert">لازم تضيف عنوانك قبل ما تقدر تستخدم التطبيق.</p>}
     <form onSubmit={save} className="mt-5 space-y-4">
       <div className="text-center">
         <img src={preview || '/logo.jpg'} alt="الصورة الشخصية" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.jpg' }} className="mx-auto h-28 w-28 rounded-full border-4 border-white bg-white object-cover shadow-md" />

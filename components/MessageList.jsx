@@ -2,8 +2,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useT } from '@/components/LangProvider'
 export default function MessageList({items}){
  const router=useRouter()
+ const {lang}=useT()
+ const empty=lang==='en'?'There are no notifications yet. Updates from the team administrators will appear here.':'{empty}'
  const[open,setOpen]=useState(null)
  const[readIds,setReadIds]=useState(()=>new Set(items.filter(i=>i.read_at).map(i=>i.id)))
  async function toggle(item){

@@ -19,7 +19,7 @@ export default function SettingsForm({ initial }) {
       <label className="label" htmlFor="rep">{en?'Administrator email address for receiving Excel reports after each session closes':'بريد الأدمن اللي هيوصله تقرير Excel بعد إغلاق كل جلسة'}</label>
       <input id="rep" type="email" required dir="ltr" className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
       {msg.text && <p className={msg.ok ? 'alert-ok' : 'alert-error'} role="status">{msg.text}</p>}
-      <button className="btn btn-navy" disabled={busy}{en?'Save':'حفظ'}</button>
+      <button className="btn btn-navy" disabled={busy}>{en?'Save':'حفظ'}</button>
     </form>
   )
 }

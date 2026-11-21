@@ -22,13 +22,13 @@ export default function SendMessageForm({ members, groups = [] }) {
   const router = useRouter()
   const { lang } = useT()
   const en = lang === 'en'
-  const copy = en ? {stages:['Preparatory','Secondary','University','Graduate'],departments:['Acting','Scenography','Media','Music','Other'],newTitle:'New notification',stage:'Filter by education stage',department:'Filter by department',groups:'Filter by group',search:'Search members',all:'Select all',selected:'selected',subject:'Notification title',body:'Notification content',choose:'Select at least one member.',failed:'The notification could not be sent. Check that both the title and content are complete.',sent:`Sent to ${sel.size} members.`,sending:'Sending...',send:'Send notification'} : {stages:['إعدادي','ثانوي','جامعة','خريج'],departments:['تمثيل','سينوغرافيا','ميديا','إعداد موسيقى','أخرى'],newTitle:'تنبيه جديد',stage:'اختيار حسب المرحلة',department:'اختيار حسب القسم',groups:'{copy.groups}',search:'ابحث عن عضو',all:'تحديد الكل',selected:'مختار',subject:'عنوان التنبيه',body:'محتوى التنبيه',choose:'اختار عضو واحد على الأقل.',failed:'ماقدرناش نبعت التنبيه. اتأكد إن العنوان والمحتوى مكتوبين.',sent:copy.sent,sending:'جاري الإرسال...',send:'إرسال التنبيه'}
   const [sel, setSel] = useState(new Set())
   const [q, setQ] = useState('')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState({ ok: false, text: '' })
+  const copy = en ? {newTitle:'New notification',stage:'Filter by education stage',department:'Filter by department',groups:'Filter by group',search:'Search members',all:'Select all',selected:'selected',subject:'Notification title',body:'Notification content',choose:'Select at least one member.',failed:'The notification could not be sent. Check that both the title and content are complete.',sent:`Sent to ${sel.size} members.`,sending:'Sending...',send:'Send notification'} : {newTitle:'تنبيه جديد',stage:'اختيار حسب المرحلة',department:'اختيار حسب القسم',groups:'اختيار حسب المجموعات',search:'ابحث عن عضو',all:'تحديد الكل',selected:'مختار',subject:'عنوان التنبيه',body:'محتوى التنبيه',choose:'اختار عضو واحد على الأقل.',failed:'ماقدرناش نبعت التنبيه. اتأكد إن العنوان والمحتوى مكتوبين.',sent:`اتبعتت لـ ${sel.size} عضو.`,sending:'جاري الإرسال...',send:'إرسال التنبيه'}
 
   const shown = useMemo(() => members.filter((m) => m.full_name.toLowerCase().includes(q.trim().toLowerCase())), [members, q])
   const allShown = shown.length > 0 && shown.every((m) => sel.has(m.id))

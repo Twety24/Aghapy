@@ -17,7 +17,10 @@ export default async function RootLayout({ children }) {
       <body className={`${plex.variable} font-sans antialiased site-body`}>
         <LangProvider lang={lang}>
           <div className="site-content">{children}</div>
-          <footer className="site-footer" dir="ltr">© 2026 Aghapy Team. All copyrights reserved.</footer>
+          <footer className="site-footer" dir="ltr">
+            <p>Made with <span className="text-stage">♥</span> by Youssef Hatem</p>
+            <p>© 2026 Aghapy Team. All copyrights reserved.</p>
+          </footer>
         </LangProvider>
         <RegisterSW />
       </body>

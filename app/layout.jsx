@@ -1,6 +1,7 @@
 import { IBM_Plex_Sans_Arabic } from 'next/font/google'
 import './globals.css'
 import RegisterSW from '@/components/RegisterSW'
+import Toggles from '@/components/Toggles'
 import { LangProvider } from '@/components/LangProvider'
 import { getLang } from '@/lib/lang'
 const plex = IBM_Plex_Sans_Arabic({ subsets: ['arabic', 'latin'], weight: ['400', '500', '700'], variable: '--font-plex' })
@@ -9,5 +10,5 @@ export const viewport = { themeColor: '#10265a', width: 'device-width', initialS
 const themeScript = `try{var t=localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){ }`
 export default async function RootLayout({ children }) {
  const lang = await getLang()
- return <html lang={lang} dir={lang === 'en' ? 'ltr' : 'rtl'} suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${plex.variable} font-sans antialiased site-body`}><LangProvider lang={lang}><div className="site-content">{children}</div><footer className="site-footer" dir="ltr">© 2026 Aghapy Team. All copyrights reserved.</footer></LangProvider><RegisterSW /></body></html>
+ return <html lang={lang} dir={lang === 'en' ? 'ltr' : 'rtl'} suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${plex.variable} font-sans antialiased site-body`}><LangProvider lang={lang}><div className="flex justify-end bg-ice px-4 py-2"><Toggles /></div><div className="site-content">{children}</div><footer className="site-footer" dir="ltr">© 2026 Aghapy Team. All copyrights reserved.</footer></LangProvider><RegisterSW /></body></html>
 }

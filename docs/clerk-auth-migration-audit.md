@@ -115,3 +115,15 @@ The current login and registration pages call Supabase Auth directly. Registrati
 - Google OAuth is marked enabled, but the production `client_id` and `client_secret` fields are empty. Google sign-in cannot be considered ready until valid credentials are configured.
 - No Clerk configuration was changed during this read. Apple sign-in remains out of scope.
 - Existing Supabase password credentials must not be assumed to transfer automatically. The migration needs a verified account-claim / password-setup plan for existing users. Do not promise seamless password continuity until the actual password-hash import compatibility and account migration path are validated.
+
+
+## Profile schema review and provisioning draft (read-only inspection)
+
+- The live `public.profiles` schema includes `full_name`, `email`, `role`, `is_active`, `created_at`, `avatar_url`, `age`, `stage`, `department`, `is_root`, `phone`, `birth_date`, `address`, and `admin_level`. New Clerk-member provisioning must preserve the current field validation and must not accept role, active-state, root, or admin-level values from the client.
+- A live check constraint `profiles_address_required_check` requires a non-empty address of at least five characters for new rows (it is `NOT VALID`, so it still applies to new inserts). The new-account flow must collect and validate address before provisioning.
+- `profiles_admin_level_check` enforces the existing member/admin/root combinations. New Clerk-created accounts must be explicitly inserted as `role='member'`, `is_root=false`, `admin_level=NULL`, `is_active=true`.
+- `profiles_age` is synchronized from `birth_date` by `sync_profile_age_from_birth_date`; the Clerk provisioning function should write birth_date and let the existing trigger derive age rather than accepting age from the browser.
+- The profile email unique index is case-sensitive. The provisioning draft adds an explicit normalized-email duplicate check to prevent case/whitespace variants from creating a second account.
+- Added `docs/drafts/20261124000000_clerk_identity_bridge.sql`. It is deliberately outside `supabase/migrations`; it drafts the mapping table, JWT-subject lookup, removal of only the application-level `profiles.id -> auth.users.id` FK, and a service-role-only member provisioning function. It does not alter any live database state and does not yet replace RLS/RPC/Storage identity checks.
+- The legacy `on_auth_user_created` trigger is intentionally preserved in the draft. Existing Supabase Auth users and their UUIDs remain untouched; the FK removal is needed only to permit future Clerk-only profile UUIDs.
+- Supabase's current Clerk guide requires the Clerk session token to carry `role: 'authenticated'` for the Supabase Data API and shows passing Clerk's session token through the Supabase client's `accessToken` option. The native Third-Party Auth integration must be verified in the actual Supabase project before any JWT-based database helper is relied upon.

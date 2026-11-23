@@ -46,7 +46,8 @@ export default async function Dashboard() {
       <main className="mx-auto -mt-16 max-w-md space-y-3 px-4 pb-3">
         <section className="text-center">
           <AvatarImage src={profile?.avatar_url} alt="الصورة الشخصية" className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-white object-cover shadow-md" />
-          <p className="mt-3 text-[10px] font-black tracking-[.24em] text-[#8a78ad]">AGHAPY TEAM</p>\n          <h1 className="mt-1 text-2xl font-black">{t('home.hi', { name: first })}</h1>
+          <p className="mt-3 text-[10px] font-black tracking-[.24em] text-[#8a78ad]">AGHAPY TEAM</p>
+          <h1 className="mt-1 text-2xl font-black">{t('home.hi', { name: first })}</h1>
           <p className="mt-1 text-sm text-navy/70">تُعَرِّفُنِي سَبِيلَ الْحَيَاةِ. (مزمور 16:11)</p>
           <p className="text-sm font-bold">{t('home.welcome')}</p>
         </section>

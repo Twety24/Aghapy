@@ -9,11 +9,11 @@ const themes = {
   teal: 'from-[#173f46] via-[#28636a] to-[#66a0a0]'
 }
 
-export default function AppPageShell({ title, eyebrow = 'AGHAPY', description, icon = 'notifications', theme = 'blue', children, wide = false }) {
+export default function AppPageShell({ title, eyebrow = 'AGHAPY', description, icon = 'notifications', theme = 'blue', children, wide = false, backLabel = 'رجوع' }) {
   return (
     <main className={`mx-auto min-h-dvh ${wide ? 'max-w-5xl' : 'max-w-3xl'} bg-[#f7f8fc] px-4 pb-12 pt-5 text-[#1d2b49] sm:px-6`}>
       <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-[#61708d] transition hover:bg-white hover:text-[#1d2b49]">
-        <span aria-hidden="true">←</span> رجوع
+        <span aria-hidden="true">←</span> {backLabel}
       </Link>
       <header className={`relative mt-3 overflow-hidden rounded-[2rem] bg-gradient-to-br ${themes[theme] || themes.blue} p-6 text-white shadow-xl sm:p-8`}>
         <div className="pointer-events-none absolute -left-12 -top-14 h-44 w-44 rounded-full border border-white/10" />

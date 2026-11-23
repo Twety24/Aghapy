@@ -42,17 +42,20 @@ html[data-theme='dark'] .skeleton-block{background:linear-gradient(100deg,#26344
 /* Accessible language and appearance controls */
 
 /* Dark-mode contrast for muted copy and reusable page surfaces */
-html[data-theme='dark'] .bg-\[\#f4f6fb\],
-html[data-theme='dark'] .bg-\[\#f7f8fc\]{background:#101827!important;color:#e5e7eb;}
-html[data-theme='dark'] .text-\[\#1d2b49\],
-html[data-theme='dark'] .text-\[\#263d70\],
-html[data-theme='dark'] .text-\[\#61708d\],
-html[data-theme='dark'] .text-\[\#8994a9\],
-html[data-theme='dark'] .text-\[\#8a4560\]{color:#cbd5e1!important;}
-html[data-theme='dark'] .border-\[\#f0e4e9\]{border-color:#475569!important;}
-html[data-theme='dark'] .bg-\[\#f8f2f4\]{background:#302536!important;}
+html[data-theme='dark'] .bg-\\[\\#f4f6fb\\],
+html[data-theme='dark'] .bg-\\[\\#f7f8fc\\]{background:#101827!important;color:#e5e7eb;}
+html[data-theme='dark'] .text-\\[\\#1d2b49\\],
+html[data-theme='dark'] .text-\\[\\#263d70\\],
+html[data-theme='dark'] .text-\\[\\#61708d\\],
+html[data-theme='dark'] .text-\\[\\#8994a9\\],
+html[data-theme='dark'] .text-\\[\\#8a4560\\]{color:#cbd5e1!important;}
+html[data-theme='dark'] .border-\\[\\#f0e4e9\\]{border-color:#475569!important;}
+html[data-theme='dark'] .bg-\\[\\#f8f2f4\\]{background:#302536!important;}
 html[data-theme='dark'] .label{color:#e2e8f0!important;}
 html[data-theme='dark'] .input::placeholder{color:#94a3b8!important;}
+html[data-theme='dark'] .text-slate-900,html[data-theme='dark'] .text-slate-800{color:#f1f5f9!important;}
+html[data-theme='dark'] .bg-slate-50{background:#111b2b!important;}
+html[data-theme='dark'] .border-slate-200{border-color:#475569!important;}
 html[data-theme='dark'] .text-slate-500{color:#aebbd0!important;}
 html[data-theme='dark'] .text-slate-600{color:#c0cada!important;}
 html[data-theme='dark'] .text-slate-700{color:#d7deea!important;}

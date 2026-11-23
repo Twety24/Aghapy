@@ -1,11 +1,14 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
+import AppPageShell from '@/components/AppPageShell'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useT } from '@/components/LangProvider'
 const departments = [['acting','تمثيل'],['scenography','سينغرافيا'],['media','ميديا'],['music_prep','إعداد موسيقى'],['other','أخرى']]
 export default function ProfileForm({ profile, email, addressRequired = false }) {
   const router = useRouter()
+  const { lang } = useT()
+  const en = lang === 'en'
   const [db] = useState(() => createClient())
   const [form, setForm] = useState({ name: profile.full_name || '', phone: profile.phone || '', address: profile.address || '', birth_date: profile.birth_date || '', stage: profile.stage || '', department: profile.department || '' })
   const [photo, setPhoto] = useState(null)
@@ -50,9 +53,7 @@ export default function ProfileForm({ profile, email, addressRequired = false })
     else router.refresh()
   }
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
-  return <main className="mx-auto min-h-dvh max-w-md bg-white px-5 py-6">
-    <Link href="/dashboard" className="text-sm underline">رجوع</Link>
-    <h1 className="mt-4 text-2xl font-bold">بياناتي</h1>
+  return <AppPageShell title="بياناتي" eyebrow="AGHAPY · MY PROFILE" description="بياناتك وصورتك الشخصية ومعلومات التواصل." icon="profile" theme="violet" backLabel={en?"Back":"رجوع"}>
     <p className="mt-2 text-sm text-navy/60" dir="ltr">{email}</p>
     {addressRequired && <p className="alert-error mt-4" role="alert">لازم تضيف عنوانك قبل ما تقدر تستخدم التطبيق.</p>}
     <form onSubmit={save} className="mt-5 space-y-4">
@@ -69,5 +70,5 @@ export default function ProfileForm({ profile, email, addressRequired = false })
       {msg && <p className="text-sm" role="status">{msg}</p>}
       <button className="btn btn-red" disabled={busy}>{busy ? 'جاري الحفظ...' : 'حفظ'}</button>
     </form>
-  </main>
+  </AppPageShell>
 }

@@ -1,6 +1,17 @@
-import Link from 'next/link'
 import {createClient} from '@/lib/supabase/server'
 import {getLang} from '@/lib/lang'
-import {tFor} from '@/lib/i18n'
+import AppPageShell from '@/components/AppPageShell'
 export const dynamic='force-dynamic'
-export default async function MeetingPage(){const t=tFor(await getLang());const db=await createClient();const{data:m}=await db.from('meeting_content').select('*').eq('id',1).maybeSingle();const img=m?.image_path?db.storage.from('meeting').getPublicUrl(m.image_path).data.publicUrl:null;const has=m&&(m.hymns?.trim()||m.word_title?.trim()||m.word_summary?.trim()||img);return <main className="mx-auto min-h-dvh max-w-md space-y-4 bg-white px-5 py-6"><Link href="/dashboard" className="text-sm underline">{t('common.back')}</Link><h1 className="text-2xl font-bold">{t('meet.title')}</h1>{!has&&<p className="rounded-xl bg-ice p-6 text-center">{t('meet.empty')}</p>}{img&&<img src={img} alt="" className="w-full rounded-2xl"/>}{m?.word_title?.trim()&&<section className="rounded-2xl bg-ice p-5"><h2 className="text-sm font-bold text-navy/60">{t('meet.word')}</h2><p className="mt-1 text-xl font-bold">{m.word_title}</p>{m.word_summary?.trim()&&<p className="mt-2 whitespace-pre-wrap leading-7">{m.word_summary}</p>}</section>}{m?.hymns?.trim()&&<section className="rounded-2xl bg-ice p-5"><h2 className="font-bold">{t('meet.hymns')}</h2><p className="mt-2 whitespace-pre-wrap leading-8">{m.hymns}</p></section>}</main>}
+export default async function MeetingPage(){
+  const en=(await getLang())==='en'
+  const db=await createClient()
+  const{data:m}=await db.from('meeting_content').select('*').eq('id',1).maybeSingle()
+  const img=m?.image_path?db.storage.from('meeting').getPublicUrl(m.image_path).data.publicUrl:null
+  const has=m&&(m.hymns?.trim()||m.word_title?.trim()||m.word_summary?.trim()||img)
+  return <AppPageShell title={en?'This week’s meeting':'اجتماع الأسبوع'} eyebrow="AGHAPY · MEETING" description={en?'The word, hymns and details prepared for the next gathering.':'الكلمة والترانيم وتفاصيل الاجتماع في مكان واحد.'} icon="meeting" theme="gold">
+    {!has&&<p className="rounded-2xl border border-[#e8ecf3] bg-white p-6 text-center text-[#71809a]">{en?'No meeting content has been added yet.':'لسه مفيش محتوى للاجتماع.'}</p>}
+    {img&&<img src={img} alt="" className="w-full rounded-[1.5rem] object-cover shadow-sm"/>}
+    {m?.word_title?.trim()&&<section className="rounded-[1.5rem] border border-[#e8ecf3] bg-white p-5 shadow-sm"><p className="text-xs font-black tracking-widest text-[#a17b43]">{en?'THE WORD':'كلمة الاجتماع'}</p><h2 className="mt-2 text-xl font-black">{m.word_title}</h2>{m.word_summary?.trim()&&<p className="mt-3 whitespace-pre-wrap leading-8 text-[#586780]">{m.word_summary}</p>}</section>}
+    {m?.hymns?.trim()&&<section className="rounded-[1.5rem] border border-[#e8ecf3] bg-white p-5 shadow-sm"><p className="text-xs font-black tracking-widest text-[#a17b43]">{en?'HYMNS':'الترانيم'}</p><p className="mt-3 whitespace-pre-wrap leading-8">{m.hymns}</p></section>}
+  </AppPageShell>
+}

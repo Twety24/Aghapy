@@ -144,7 +144,7 @@ export default function SpiritualJournalPage() {
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[11px] text-[#9aa4b7]">
                   <span>{isFuture ? (en ? 'Not yet' : 'اليوم لسه مجاش') : hasActivity ? (en ? 'Nice step recorded' : 'خطوة حلوة اتسجلت') : (en ? 'Ready when you are' : 'لسه مستني خطوتك')}</span>
-                  <span>{saving === date ? '{en ? 'Saving...' : 'بيحفظ...'}' : saved === date ? '{en ? 'Saved ✓' : 'اتحفظت ✓'}' : '{en ? 'Auto-saved' : 'حفظ تلقائي'}'}</span>
+                  <span>{saving === date ? (en ? 'Saving...' : 'بيحفظ...') : saved === date ? (en ? 'Saved ✓' : 'اتحفظت ✓') : (en ? 'Auto-saved' : 'حفظ تلقائي')}</span>
                 </div>
               </article>
             )

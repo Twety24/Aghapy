@@ -82,9 +82,9 @@ export default function SpiritualJournalPage() {
         <div className="pointer-events-none absolute -bottom-16 right-8 h-48 w-48 rounded-full border-[24px] border-white/5" />
         <div className="relative flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold tracking-[.2em] text-white/65">AGHAPY · YOUR WEEKLY WALK</p>
+            <p className="text-xs font-bold tracking-[.2em] text-white/65">AGHAPY · WEEKLY NOTES</p>
             <h1 className="mt-2 text-3xl font-black">{en ? 'Spiritual Journal' : 'النوتة الروحية'}</h1>
-            <p className="mt-2 max-w-sm text-sm leading-6 text-white/80">{en ? 'Your spiritual life journal.' : 'نوتة حياتك الروحية.'}</p>
+            <p className="mt-2 max-w-sm text-sm leading-6 text-white/80">{en ? 'A simple journal for your everyday habits.' : 'نوتة بسيطة لتسجيل عاداتك اليومية.'}</p>
           </div>
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/10 text-3xl">✧</div>
         </div>
@@ -167,7 +167,6 @@ export default function SpiritualJournalPage() {
         <section className="mt-5 rounded-[1.6rem] bg-[#eee9f6] p-5 text-[#51406e]">
           <div className="flex items-center gap-2"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/80 text-xl">✧</span><div><p className="font-black">{en ? 'Weekly overview' : 'ملخص الأسبوع'}</p><p className="text-[11px] text-[#897c9e]">{en ? 'A quick look at this week' : 'قراءة سريعة لتسجيلات الأسبوع'}</p></div></div>
           <p className="mt-3 text-sm leading-6">{en ? automation.nextStepEn : automation.nextStep}</p>
-          <p className="mt-2 text-[11px] text-[#897c9e]">{en ? 'This is a personal organizer, not a spiritual score.' : 'الأرقام دي للتنظيم الشخصي، مش تقييم روحي.'}</p>
         </section>
       )}
     </main>

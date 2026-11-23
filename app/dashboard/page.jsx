@@ -37,14 +37,14 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-[calc(100dvh-4.25rem)] bg-ice">
-      <header className="bg-navy px-4 pb-20 pt-3 text-white">
+      <header className="bg-gradient-to-br from-[#142b5a] via-[#263f78] to-[#342d59] px-4 pb-20 pt-3 text-white">
         <div className="mx-auto flex max-w-md items-center justify-between gap-3">
           <HomeMenu links={menu} signOut={signOut} />
           <Toggles className="text-white" />
         </div>
       </header>
       <main className="mx-auto -mt-16 max-w-md space-y-3 px-4 pb-3">
-        <section className="text-center">
+        <section className="rounded-[1.8rem] border border-white bg-white px-5 pb-5 pt-4 text-center shadow-lg ring-1 ring-navy/5">
           <AvatarImage src={profile?.avatar_url} alt="الصورة الشخصية" className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-white object-cover shadow-md" />
           <p className="mt-3 text-[10px] font-black tracking-[.24em] text-[#8a78ad]">AGHAPY TEAM</p>
           <h1 className="mt-1 text-2xl font-black">{t('home.hi', { name: first })}</h1>

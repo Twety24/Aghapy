@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getAdminContext } from '@/lib/guard'
-import { JOURNAL_DAYS, getWeekStart, toLocalISO, addDays } from '@/lib/spiritual-journal/constants'
+import { getWeekStart, toLocalISO, addDays } from '@/lib/spiritual-journal/constants'
 
 export const dynamic = 'force-dynamic'
 const one = value => Array.isArray(value) ? value[0] : value
@@ -9,7 +9,8 @@ export default async function SpiritualJournalAdminPage() {
   const context = await getAdminContext()
   if (!context) return null
   const db = await createClient()
-  const weekStart = toLocalISO(getWeekStart())
+  const cairoNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }))
+  const weekStart = toLocalISO(getWeekStart(cairoNow))
   const weekEnd = addDays(weekStart, 6)
   const { data, error } = await db.from('spiritual_journal_entries')
     .select('user_id,entry_date,bible_reading,attended_liturgy,prayed,agpeya_hours,profiles(full_name)')

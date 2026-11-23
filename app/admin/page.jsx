@@ -12,12 +12,12 @@ function Stat({ label, value }) {
 export default async function Overview() {
   const en = (await getLang()) === 'en'
   const db = await createClient()
-  const [{ count: total }, { count: sugg }, { data: latest }, { data: recent }, { data: recentSugg }] = await Promise.all([
+  const [{ count: total }, { count: journalCount }, { data: latest }, { data: recent }, { data: recentJournal }] = await Promise.all([
     db.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    db.from('suggestions').select('id', { count: 'exact', head: true }),
+    db.from('spiritual_journal_entries').select('id', { count: 'exact', head: true }),
     db.from('attendance_sessions').select('id, meeting_date, status').order('meeting_date', { ascending: false }).limit(1),
     db.from('attendance_records').select('full_name, checked_in_at').eq('status', 'present').order('checked_in_at', { ascending: false }).limit(5),
-    db.from('suggestions').select('content, created_at, is_anonymous, profiles(full_name)').order('created_at', { ascending: false }).limit(3)
+    db.from('spiritual_journal_entries').select('entry_date,bible_reading,attended_liturgy,prayed,profiles(full_name)').order('entry_date', { ascending: false }).limit(3)
   ])
   const s = latest?.[0]
   let present = 0
@@ -34,7 +34,7 @@ export default async function Overview() {
         <Stat label={en ? 'Present' : 'حضروا'} value={present} />
         <Stat label={en ? 'Absent' : 'غابوا'} value={absent} />
         <Stat label={en ? 'Attendance rate' : 'نسبة الحضور'} value={`${pct}%`} />
-        <Stat label={en ? 'Suggestions' : 'المقترحات'} value={sugg ?? 0} />
+        <Stat label={en ? 'Journal entries' : 'تسجيلات النوتة الروحية'} value={journalCount ?? 0} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
@@ -45,10 +45,10 @@ export default async function Overview() {
           </ul>
         </section>
         <section className="rounded-2xl bg-white p-5 ring-1 ring-navy/10">
-          <h2 className="font-bold">{en ? 'Recent suggestions' : 'آخر المقترحات'}</h2>
+          <h2 className="font-bold">{en ? 'Recent journal activity' : 'آخر نشاط في النوتة الروحية'}</h2>
           <ul className="mt-3 space-y-3 text-sm">
-            {(recentSugg || []).map((r, i) => <li key={i}><p className="line-clamp-2">{r.content}</p><p className="text-navy/60">{r.is_anonymous ? (en ? 'Anonymous' : 'مجهول') : one(r.profiles)?.full_name} · {fmt(r.created_at)}</p></li>)}
-            {!recentSugg?.length && <li className="text-navy/60">{en ? 'Nothing yet.' : 'لسه مفيش.'}</li>}
+            {(recentJournal || []).map((r, i) => <li key={i}><p className="line-clamp-2">{r.entry_date} · {[r.bible_reading && (en ? 'Bible reading' : 'قراءة الإنجيل'), r.attended_liturgy && (en ? 'Liturgy' : 'القداس'), r.prayed && (en ? 'Prayer' : 'الصلاة')].filter(Boolean).join(' · ') || (en ? 'Journal opened' : 'فتح النوتة')}</p><p className="text-navy/60">{one(r.profiles)?.full_name || '—'}</p></li>)}
+            {!recentJournal?.length && <li className="text-navy/60">{en ? 'Nothing yet.' : 'لسه مفيش.'}</li>}
           </ul>
         </section>
       </div>

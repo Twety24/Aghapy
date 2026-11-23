@@ -110,6 +110,7 @@ export default function SpiritualJournalPage() {
             const date = weekDates[index]
             const entry = { ...EMPTY_ENTRY, ...(entries[date] || {}) }
             const isToday = date === today
+            const isFuture = date > today
             const hasActivity = entry.bible_reading || entry.attended_liturgy || entry.prayed || entry.agpeya_hours.length
             return (
               <article key={date} className={`rounded-[1.6rem] border p-4 shadow-sm transition ${isToday ? 'border-[#8b77bd] bg-[#fbf9ff] ring-2 ring-[#e9e2f6]' : 'border-[#e8ecf3] bg-white'}`}>
@@ -122,7 +123,7 @@ export default function SpiritualJournalPage() {
                 </div>
                 <div className="mt-4 space-y-2">
                   {activities.map(activity => (
-                    <button key={activity.key} disabled={saving === date} onClick={() => updateDay(date, { [activity.key]: !entry[activity.key] })} className={`flex w-full items-center gap-3 rounded-xl p-3 text-start transition active:scale-[.99] disabled:opacity-50 ${entry[activity.key] ? activity.color : 'bg-[#f7f8fb] text-[#77839a] hover:bg-[#f0f2f7]'}`}>
+                    <button key={activity.key} disabled={saving === date || isFuture} onClick={() => updateDay(date, { [activity.key]: !entry[activity.key] })} className={`flex w-full items-center gap-3 rounded-xl p-3 text-start transition active:scale-[.99] disabled:opacity-50 ${entry[activity.key] ? activity.color : 'bg-[#f7f8fb] text-[#77839a] hover:bg-[#f0f2f7]'}`}>
                       <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/80 text-lg">{activity.icon}</span>
                       <span className="flex-1 text-sm font-bold">{activity.label}</span>
                       <span className="text-lg">{entry[activity.key] ? '✓' : '+'}</span>
@@ -134,12 +135,12 @@ export default function SpiritualJournalPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {AGPEYA_HOURS.map(hour => {
                       const active = entry.agpeya_hours.includes(hour.id)
-                      return <button key={hour.id} disabled={saving === date} onClick={() => toggleHour(date, hour.id)} title={hour.sub} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${active ? 'border-[#705b91] bg-[#705b91] text-white' : 'border-[#e4dced] bg-white text-[#6e6080] hover:border-[#9a84bb]'} disabled:opacity-50`}>{hour.label}</button>
+                      return <button key={hour.id} disabled={saving === date || isFuture} onClick={() => toggleHour(date, hour.id)} title={hour.sub} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${active ? 'border-[#705b91] bg-[#705b91] text-white' : 'border-[#e4dced] bg-white text-[#6e6080] hover:border-[#9a84bb]'} disabled:opacity-50`}>{hour.label}</button>
                     })}
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[11px] text-[#9aa4b7]">
-                  <span>{hasActivity ? 'خطوة حلوة اتسجلت' : 'لسه مستني خطوتك'}</span>
+                  <span>{isFuture ? 'اليوم لسه مجاش' : hasActivity ? 'خطوة حلوة اتسجلت' : 'لسه مستني خطوتك'}</span>
                   <span>{saving === date ? 'بيحفظ...' : saved === date ? 'اتحفظت ✓' : 'حفظ تلقائي'}</span>
                 </div>
               </article>

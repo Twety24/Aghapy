@@ -24,7 +24,7 @@ Status: planning/audit only. This document is on `feature/clerk-auth-migration`.
 - The `on_auth_user_created` AFTER INSERT trigger is currently installed and calls `public.handle_new_user()`; the reason this existing auth row has no profile is still unknown (for example, it may predate the current trigger state or its profile may have been removed later). The audit has not established which explanation is correct.
 - This unmatched account is not to be deleted, silently linked, or guessed. It needs a deliberate resolution path before cutover.
 - Public RLS policies directly use `auth.uid()` for member ownership in attendance, excuses, group membership/messages, message recipients, notifications, photos, profiles, and spiritual journal entries.
-- Existing private admin helpers `private.is_admin()`, `private.is_group_member()`, `private.is_super_admin()`, `private.is_senior_admin()`, and `private.is_admin_chat_group()` rely directly or indirectly on the Supabase UUID identity.
+- Confirmed private identity helpers are `private.is_admin()`, `private.is_group_member()`, and `private.is_super_admin()`. `private.is_admin_chat_group(uuid)` checks group metadata rather than caller identity. The earlier mention of `private.is_senior_admin()` was not confirmed in the live catalog and must not be treated as an existing function.
 - Security-definer functions also use `auth.uid()`: `send_message`, `get_photos`, `group_chat`, `mark_message_read`, `protect_profile_columns`, and `protect_role_changes`.
 - The deployed database migration history contains `20261123201843 spiritual_journal_entries`, which was not present in the inspected repository migration tree. Reconcile this drift before any database migration.
 
@@ -72,3 +72,22 @@ Status: planning/audit only. This document is on `feature/clerk-auth-migration`.
 - Supabase Clerk third-party auth guide: https://supabase.com/docs/guides/auth/third-party/clerk
 
 The native third-party integration is preferred. The older Clerk JWT-template integration is deprecated.
+
+
+## Follow-up database dependency review (read-only)
+
+- The live catalog currently exposes nine public/private functions whose source directly references `auth.uid()`: `private.is_admin`, `private.is_group_member`, `private.is_super_admin`, `public.get_photos`, `public.group_chat`, `public.mark_message_read`, `public.protect_profile_columns`, `public.protect_role_changes`, and `public.send_message`.
+- The profile protection trigger set also includes `prevent_super_admin_delete`, `protect_last_admin`, `sync_admin_chat_membership`, and `sync_profile_age_from_birth_date`. The first three are authorization/role-sensitive and must be reviewed alongside mapped identity changes; the age trigger is not an auth identity dependency.
+- All 21 application tables in the inspected public schema have RLS enabled. The live policy inventory includes 7 Storage object policies in addition to the public-table policies. RLS must remain enabled throughout migration.
+- Storage object ownership currently compares the first folder segment to auth.uid()::text for avatar delete/insert and gallery upload. Those path checks must be migrated to the mapped legacy profile UUID (or an equivalently strict server-owned path design). Admin-only gallery/meeting policies use is_admin().
+- The profile FK to auth.users(id) is the only application FK found targeting auth.users; the other listed FKs are internal Supabase Auth relationships. Do not alter internal Auth constraints. Any profile FK change must be isolated and reviewed as a deliberate compatibility boundary.
+- Re-count confirmed during this follow-up: 48 Auth users, 47 profiles, exactly one Auth user without a profile, and zero profiles without an Auth user.
+- The deployed migration ledger contains 31 entries in the current read. Its latest entry is 20261123201843 spiritual_journal_entries. The repository migration directory must be reconciled against this ledger before creating an executable migration; no migration has been applied.
+- The installed package manifest and lockfile currently do not include @clerk/nextjs. No dependency changes have been made.
+
+## Additional implementation constraints
+
+- Do not rewrite Storage policies by broad text replacement: preserve each bucket's current permissions and map the folder owner to the profile UUID derived from the verified Clerk subject.
+- Preserve trigger behavior that prevents Super Admin deletion, protects the last active admin, and synchronizes admin-chat membership. Test role changes and membership synchronization after changing the identity helper.
+- Keep the existing Supabase Auth records intact during the initial migration. The FK issue is limited to the application profile table; there is no justification to delete or rewrite legacy Auth users as part of the Clerk cutover.
+- The prior GitHub code-search endpoint returned default-branch matches, not branch-pinned results. Treat those search hits as discovery hints only; implementation review must use files fetched from feature/clerk-auth-migration.

@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
+import AppPageShell from '@/components/AppPageShell'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 const departments = [['acting','تمثيل'],['scenography','سينغرافيا'],['media','ميديا'],['music_prep','إعداد موسيقى'],['other','أخرى']]
@@ -69,5 +69,5 @@ export default function ProfileForm({ profile, email, addressRequired = false })
       {msg && <p className="text-sm" role="status">{msg}</p>}
       <button className="btn btn-red" disabled={busy}>{busy ? 'جاري الحفظ...' : 'حفظ'}</button>
     </form>
-  </main>
+  </AppPageShell>
 }

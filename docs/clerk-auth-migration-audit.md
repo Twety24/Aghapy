@@ -135,3 +135,15 @@ The current login and registration pages call Supabase Auth directly. Registrati
 - This permits a controlled overlap/rollback window instead of immediately invalidating all current Supabase sessions when the mapping helper is introduced. The exact issuer must be verified against a real legacy JWT in staging before the helper is promoted to a migration.
 - An unknown Clerk subject intentionally resolves to NULL. It must never fall back to a browser-supplied profile UUID or an email-only lookup during normal requests.
 - Both SQL drafts were updated to include this compatibility behavior; neither has been executed against any database.
+
+
+## Live RLS / RPC identity inventory (read-only, 2026-11-23)
+
+- Captured the current `pg_policies` definitions for all policies in `public` and `storage`, including exact commands, role targets, USING expressions and WITH CHECK expressions. The direct `auth.uid()` predicates occur in attendance, excuses, group membership/messages, message recipients/messages, notification preferences/notifications, photos, profiles, spiritual journal entries, and the avatar/gallery Storage ownership rules.
+- Captured every current function body whose source contains `auth.uid()`. The live set is exactly nine functions: `private.is_admin`, `private.is_group_member`, `private.is_super_admin`, `public.get_photos`, `public.group_chat`, `public.mark_message_read`, `public.protect_profile_columns`, `public.protect_role_changes`, and `public.send_message`.
+- Confirmed `public.is_admin()` and `public.is_group_member(uuid)` are wrappers around the private helpers. Replacing the private helper implementations preserves these existing wrapper call sites and their policy semantics.
+- Added `docs/drafts/20261125000000_clerk_rls_identity_rewrite.sql`. It drafts identity-aware private helpers, preserves the public wrappers, rewrites the nine inspected functions, and includes a transactional policy-rebuild block that substitutes only `auth.uid()` with `private.current_profile_id()` while preserving each policy's roles, command, permissive mode, USING predicate, and WITH CHECK predicate.
+- The policy-rebuild block is unexecuted and must be validated on a restored staging database. In particular, diff every resulting policy against the captured pre-migration inventory before considering it for a real migration.
+- Storage ownership remains based on the first object-path folder segment. After cutover, that segment must remain the stable `profiles.id` UUID, not the Clerk subject. Existing stored paths therefore remain valid without renaming.
+- The live normalized profile-email check found no duplicates. There is still exactly one legacy `auth.users` row without a matching profile; it remains unresolved and must not be auto-linked or deleted.
+- The reviewed function inventory is based on function source containing `auth.uid()`. Before cutover, separately inspect trigger dependencies, RPC EXECUTE grants, and every server route/client call site; the inventory alone does not certify complete application compatibility.

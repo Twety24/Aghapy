@@ -3,9 +3,12 @@ import { useState } from 'react'
 import AppPageShell from '@/components/AppPageShell'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useT } from '@/components/LangProvider'
 const departments = [['acting','تمثيل'],['scenography','سينغرافيا'],['media','ميديا'],['music_prep','إعداد موسيقى'],['other','أخرى']]
 export default function ProfileForm({ profile, email, addressRequired = false }) {
   const router = useRouter()
+  const { lang } = useT()
+  const en = lang === 'en'
   const [db] = useState(() => createClient())
   const [form, setForm] = useState({ name: profile.full_name || '', phone: profile.phone || '', address: profile.address || '', birth_date: profile.birth_date || '', stage: profile.stage || '', department: profile.department || '' })
   const [photo, setPhoto] = useState(null)

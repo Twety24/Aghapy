@@ -106,3 +106,12 @@ Storage policies currently comprise: avatars own insert/delete; gallery own inse
 ## Authentication flow findings from branch-pinned code
 
 The current login and registration pages call Supabase Auth directly. Registration relies on the `auth.users` trigger to create `profiles`, stores signup fields in Supabase user metadata, and uploads an avatar under a path beginning with the Supabase user UUID. Password reset and email callback also rely on Supabase Auth. The server guard and request proxy likewise read Supabase sessions. Therefore Clerk migration must replace all of these together with a staged compatibility path; simply swapping the login form is insufficient.
+
+
+## Clerk production configuration re-check (read-only, 2026-11-23)
+
+- Production instance confirms email is required and verified at sign-up. Email sign-in strategy is currently `email_code` only.
+- Password authentication is enabled and required, with a configured minimum length of 15 characters. The sign-in strategy list for email does not include password because Clerk models password authentication separately from email-code/link strategies. The UI migration must be tested against the actual Clerk sign-in flow; do not infer the final sign-in screen from the email strategy array alone.
+- Google OAuth is marked enabled, but the production `client_id` and `client_secret` fields are empty. Google sign-in cannot be considered ready until valid credentials are configured.
+- No Clerk configuration was changed during this read. Apple sign-in remains out of scope.
+- Existing Supabase password credentials must not be assumed to transfer automatically. The migration needs a verified account-claim / password-setup plan for existing users. Do not promise seamless password continuity until the actual password-hash import compatibility and account migration path are validated.

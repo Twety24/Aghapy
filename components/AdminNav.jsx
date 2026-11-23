@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useT } from '@/components/LangProvider'
-const links = [['/admin','nav.overview'],['/admin/attendance','nav.attendance'],['/admin/members','nav.members'],['/admin/groups','nav.groups'],['/admin/meeting','nav.meeting'],['/admin/messages','nav.messages'],['/admin/suggestions','nav.suggestions'],['/admin/reports','nav.reports'],['/admin/photos','nav.photos'],['/admin/settings','nav.settings']]
+const links = [['/admin','nav.overview'],['/admin/attendance','nav.attendance'],['/admin/members','nav.members'],['/admin/groups','nav.groups'],['/admin/meeting','nav.meeting'],['/admin/messages','nav.messages'],['/admin/spiritual-journal','nav.suggestions'],['/admin/reports','nav.reports'],['/admin/photos','nav.photos'],['/admin/settings','nav.settings']]
 export default function AdminNav() {
   const path = usePathname()
   const { t } = useT()

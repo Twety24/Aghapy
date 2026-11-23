@@ -147,3 +147,46 @@ The current login and registration pages call Supabase Auth directly. Registrati
 - Storage ownership remains based on the first object-path folder segment. After cutover, that segment must remain the stable `profiles.id` UUID, not the Clerk subject. Existing stored paths therefore remain valid without renaming.
 - The live normalized profile-email check found no duplicates. There is still exactly one legacy `auth.users` row without a matching profile; it remains unresolved and must not be auto-linked or deleted.
 - The reviewed function inventory is based on function source containing `auth.uid()`. Before cutover, separately inspect trigger dependencies, RPC EXECUTE grants, and every server route/client call site; the inventory alone does not certify complete application compatibility.
+
+
+## Corrected migration reconciliation and RLS draft status (read-only, 2026-11-23)
+
+### Migration ledger comparison
+
+The previous comparison incorrectly treated differing timestamp prefixes as proof that every filename was absent from the database ledger. Reconciliation by migration slug shows a more specific result:
+
+- The database ledger has 35 entries.
+- The repository contains 28 SQL files: 4 legacy/manual baseline scripts and 24 timestamped migration files.
+- 18 ledger entries have a repository file with the same migration slug, although several timestamp prefixes differ.
+- 17 ledger entries have no matching timestamped file by slug in the current branch. This includes the early profile/signup/notification migrations and the three latest database entries: `spiritual_journal_entries`, `complete_excuse_review_workflow`, and `clean_excuse_indexes`.
+- Six timestamped repository files have no ledger entry with the same slug: `add_profile_phone`, `notification_preferences`, `remove_daily_verse_enable_parallel_sessions`, `performance_indexes_and_realtime`, `rename_broadcast_message_notifications`, and `add_encrypted_gmail_oauth_connection` is actually present in the ledger under the same slug but with a different timestamp. (The encrypted Gmail migration is therefore not in the six-file unmatched set.)
+- The four baseline scripts are not timestamped migration files. `003_cron.sql` is an operational setup script, not a migration-ledger entry. `001_schema.sql`, `002_admin_features.sql`, and `004_team_features.sql` are historical bootstrap scripts and must not be replayed against the current database.
+- This comparison is by slug only. It does not prove that the repository file content equals the SQL that was applied to the database. In particular, the profile/department/signup and notification migrations absent from the branch must be recovered from authoritative history or reconstructed from a database schema diff before any migration file is created.
+
+### Corrected live function definitions and grants
+
+A fresh read-only `pg_get_functiondef()` inspection confirmed these exact identity-dependent signatures:
+
+- `private.is_admin()`: boolean, SQL, STABLE, SECURITY DEFINER, empty search_path.
+- `private.is_group_member(uuid)`: boolean, SQL, STABLE, SECURITY DEFINER, empty search_path.
+- `private.is_super_admin()`: boolean, SQL, STABLE, SECURITY DEFINER, empty search_path.
+- `public.get_photos(uuid)`: TABLE(id uuid, path text, status text, created_at timestamptz, uploader_name text, mine boolean), SQL, STABLE, SECURITY DEFINER, empty search_path.
+- `public.group_chat(uuid)`: TABLE(id uuid, body text, created_at timestamptz, sender_name text, mine boolean), SQL, STABLE, SECURITY DEFINER, empty search_path.
+- `public.mark_message_read(uuid)`: void, SQL, SECURITY DEFINER, empty search_path.
+- `public.protect_profile_columns()`: trigger, PL/pgSQL, SECURITY DEFINER, search_path=public.
+- `public.protect_role_changes()`: trigger, PL/pgSQL, SECURITY DEFINER, empty search_path.
+- `public.send_message(text,text,uuid[])`: uuid, PL/pgSQL, SECURITY DEFINER, empty search_path.
+
+Observed EXECUTE privileges: authenticated can execute the three private identity helpers and the four public RPCs (`get_photos`, `group_chat`, `mark_message_read`, `send_message`). Authenticated cannot directly execute the two trigger functions. None of the nine functions is executable by anon. The current role privilege query reports service_role execution on most but not all helpers; preserve the exact per-function ACL rather than normalizing grants during the identity rewrite.
+
+### Trigger behavior verified
+
+- `prevent_super_admin_delete()` is a BEFORE DELETE trigger and rejects deletion of any row with `is_root=true`.
+- `protect_last_admin()` is a BEFORE UPDATE trigger and prevents removing/deactivating the last active admin.
+- `sync_admin_chat_membership()` is an AFTER INSERT OR UPDATE OF role/is_active/admin_level trigger and updates membership using the target row's `new.id`.
+- `sync_profile_age_from_birth_date()` is a BEFORE INSERT OR UPDATE OF birth_date/age trigger and derives age from birth_date.
+- These four trigger functions do not use `auth.uid()`; keep their definitions unchanged unless a separately demonstrated dependency requires otherwise.
+
+### Superseded RLS draft warning
+
+The previous contents of `docs/drafts/20261125000000_clerk_rls_identity_rewrite.sql` included reconstructed function bodies that did not preserve the live definitions. In particular, the proposed `protect_profile_columns()` and `protect_role_changes()` bodies were not faithful substitutions. That file has now been replaced with a non-executable warning comment and must not be run. A new RLS draft must be generated directly from the exact live `pg_get_functiondef()` output, with only the actor identity expressions replaced. It must also preserve the per-function ACLs and be tested against a restored staging database. No live database change was made.

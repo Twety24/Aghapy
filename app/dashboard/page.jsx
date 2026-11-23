@@ -32,7 +32,7 @@ export default async function Dashboard() {
   if (profile?.address == null || !profile.address.trim()) redirect('/profile?complete=address')
   if (profile && !profile.is_active) return <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center"><p className="alert-error">Account suspended. Contact the administrator.</p><form action={signOut}><button className="btn btn-navy">{t('common.logout')}</button></form></main>
   const first = (profile?.full_name || '').split(' ')[0]
-  const cards = [['/messages', 'nav.messages', 'notifications'], ['/photos', 'nav.photos', 'photos'], ['/meeting', 'nav.meeting', 'meeting'], ['/excuse', 'nav.excuse', 'excuse'], ['/suggestions', 'nav.suggestions', 'suggestions'], ['/chats', 'nav.chats', 'chats']]
+  const cards = [['/messages', 'nav.messages', 'notifications'], ['/photos', 'nav.photos', 'photos'], ['/meeting', 'nav.meeting', 'meeting'], ['/excuse', 'nav.excuse', 'excuse'], ['/spiritual-journal', 'nav.suggestions', 'spiritual'], ['/chats', 'nav.chats', 'chats']]
   const menu = [['/scan', 'home.scan'], ...cards.map(([href, key]) => [href, key]), ['/profile', 'nav.profile'], ...(profile?.role === 'admin' ? [['/admin', 'nav.admin']] : [])]
 
   return (

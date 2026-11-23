@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import AppPageShell from '@/components/AppPageShell'
 import jsQR from 'jsqr'
 import { useT } from '@/components/LangProvider'
 
@@ -101,12 +101,9 @@ export default function ScanPage() {
   const ok = result && (result.code === 'ok' || result.code === 'already')
 
   return (
-    <main className="mx-auto min-h-dvh max-w-md bg-navy px-5 py-6 text-white">
-      <Link href="/dashboard" className="text-sm text-sky underline">{c.back}</Link>
-      <h1 className="mt-4 text-2xl font-bold">{c.title}</h1>
+    <AppPageShell title={c.title} eyebrow="AGHAPY · CHECK-IN" description={c.hint} icon="scan" theme="blue">
       {state !== 'done' && state !== 'denied' && (
         <>
-          <p className="mt-1 text-sky">{c.hint}</p>
           <div className="mt-6 overflow-hidden rounded-3xl ring-4 ring-sky/40">
             <video ref={video} muted playsInline className="aspect-square w-full bg-black object-cover" />
           </div>
@@ -126,6 +123,6 @@ export default function ScanPage() {
           {ok ? <Link href="/dashboard" className="btn btn-navy">{c.success}</Link> : <button className="btn btn-red" onClick={start}>{c.scanAgain}</button>}
         </div>
       )}
-    </main>
+    </AppPageShell>
   )
 }

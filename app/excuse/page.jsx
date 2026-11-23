@@ -22,7 +22,7 @@ export default function ExcusePage(){
     setBusy(false)
     setMsg(error?t('common.error'):t('exc.ok'))
   }
-  return <AppPageShell title={t('exc.title')} eyebrow="AGHAPY · ATTENDANCE" description={en?'Send a note to the team if you cannot make a meeting.':'لو مش هتقدر تحضر اجتماع، ابعت توضيح للفريق.'} icon="excuse" theme="rose">
+  return <AppPageShell title={t('exc.title')} eyebrow="AGHAPY · ATTENDANCE" description={en?'Send a note to the team if you cannot make a meeting.':'لو مش هتقدر تحضر اجتماع، ابعت توضيح للفريق.'} icon="excuse" theme="rose" backLabel={en ? "Back" : "رجوع"}>
     <form onSubmit={submit} className="space-y-4 rounded-[1.5rem] border border-[#f0e4e9] bg-white p-5 shadow-sm">
       <div><label className="label">{en?'Meeting date':'تاريخ الاجتماع'}</label><input className="input" type="date" required value={date} onChange={e=>setDate(e.target.value)}/></div>
       <div><label className="label">{en?'Reason':'سبب الاعتذار'}</label><textarea className="input min-h-36 resize-y" value={reason} onChange={e=>setReason(e.target.value)} placeholder={t('exc.placeholder')} required maxLength={1000}/><p className="mt-1 text-xs text-[#8994a9]">{reason.length}/1000</p></div>

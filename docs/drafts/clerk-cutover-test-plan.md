@@ -119,3 +119,36 @@ Status: planning document only. No production settings, database objects, or run
 - The owner must configure Clerk's production email/password strategy and Google OAuth credentials when the migration reaches production configuration.
 - The owner must provide explicit approval before any production database DDL, Clerk production setting change, Vercel environment change, or deployment.
 - Never request the Clerk Secret Key in chat. Configure secrets directly in the deployment provider's secure environment-variable interface.
+
+
+## 6. Branch-pinned application impact inventory
+
+### Routes that currently consume Supabase Auth identity
+
+- `app/api/attendance/checkin/route.js`: reads the Supabase user UUID and uses it as `profiles.id` and `attendance_records.user_id`. After Clerk, this must resolve the Clerk subject to the legacy profile UUID before reading profile status or inserting attendance.
+- `app/api/suggestions/route.js`: uses the Supabase user UUID as `suggestions.user_id`. Anonymous suggestions still need a trusted authenticated actor for submission, even when the stored author is hidden.
+- `app/api/suggestions/admins/route.js`: requires a signed-in user before returning active Admin recipients.
+- `app/api/admin/members/route.js`: returns the actor's ID to the browser and compares target IDs with that actor ID. The response must expose the mapped profile UUID for UI comparisons, never use the Clerk subject as a profile UUID.
+- `app/api/admin/session/route.js`: writes `attendance_sessions.created_by` as the actor's profile UUID.
+- `app/api/admin/gmail/connect` and callback: the OAuth state is bound to the authenticated actor. Keep the state tied to a stable server-verified actor identity; do not accept an actor ID from the callback query.
+- `app/api/admin/reports/*`, `app/api/admin/token`, `app/api/admin/session/close`, `app/api/admin/gmail/disconnect`, and `app/api/admin/storage-cleanup`: currently depend on `getAdmin()` / `getSeniorAdmin()`; those guards must become Clerk-aware and preserve current Admin authorization.
+- `app/api/cron/close`: uses its separate constant-time CRON_SECRET check, not a Supabase user session. Preserve that independent machine-auth path.
+
+### Server-rendered pages and client components with profile UUID assumptions
+
+- `app/profile/page.jsx` loads the profile by `user.id`.
+- `app/photos/page.jsx` loads the current profile role by `user.id` and passes `user.id` as Gallery's `userId`; Gallery uses it for Storage folder names and `photos.uploaded_by`.
+- `app/messages/page.jsx` filters `message_recipients.user_id` by `user.id`.
+- `app/chats/[id]/page.jsx`, `app/chats/page.jsx`, and `components/GroupChat.jsx` rely on the Supabase Auth session; GroupChat currently submits `sender_id` from the client session. Under Clerk, the RPC/policy must derive the sender from the verified JWT mapping, not trust a submitted sender ID.
+- `app/excuse/page.jsx` writes `excuses.user_id` from the client session; this must use a trusted profile UUID or be moved behind a server endpoint.
+- `app/dashboard/page.jsx` uses the Auth UUID for profiles, notifications, notification preferences, and client notification components; all these values must use the mapped profile UUID. Its server action currently signs out of Supabase Auth and must be replaced with Clerk sign-out.
+- `components/MembersManager.jsx` compares a profile UUID returned by the admin API with the actor ID. Keep this as a profile UUID comparison after migration.
+- `components/ProfileForm.jsx` already receives a profile object with a stable profile UUID; preserve that contract.
+
+### Registration and profile creation compatibility boundary
+
+The existing signup trigger `public.handle_new_user()` inserts `profiles.id = auth.users.id`. Clerk-created users will not have a corresponding Supabase Auth user, so this trigger cannot create their profile. A future atomic, trusted Clerk webhook/server workflow must create a new UUID profile and its mapping row together. Before that workflow is enabled, the FK `profiles.id -> auth.users.id` and the existing trigger must be changed deliberately. Existing legacy Auth users and their profile UUIDs must remain untouched.
+
+### Security-sensitive observation
+
+Several existing service-role API routes trust `getAdminContext()` before reading or writing unrestricted tables. The migration must replace that guard with a Clerk server-session verification plus a server-side lookup of the mapped profile and active Admin role. The service-role client must remain server-only and must never become the default data client for ordinary profile-owned operations.

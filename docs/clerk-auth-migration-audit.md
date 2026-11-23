@@ -82,7 +82,7 @@ The native third-party integration is preferred. The older Clerk JWT-template in
 - Storage object ownership currently compares the first folder segment to auth.uid()::text for avatar delete/insert and gallery upload. Those path checks must be migrated to the mapped legacy profile UUID (or an equivalently strict server-owned path design). Admin-only gallery/meeting policies use is_admin().
 - The profile FK to auth.users(id) is the only application FK found targeting auth.users; the other listed FKs are internal Supabase Auth relationships. Do not alter internal Auth constraints. Any profile FK change must be isolated and reviewed as a deliberate compatibility boundary.
 - Re-count confirmed during this follow-up: 48 Auth users, 47 profiles, exactly one Auth user without a profile, and zero profiles without an Auth user.
-- The deployed migration ledger contains 31 entries in the current read. Its latest entry is 20261123201843 spiritual_journal_entries. The repository migration directory must be reconciled against this ledger before creating an executable migration; no migration has been applied.
+- The deployed migration ledger contains 33 entries in the current read. Its latest entry is 20261123201843 spiritual_journal_entries. The repository migration directory must be reconciled against this ledger before creating an executable migration; no migration has been applied.
 - The installed package manifest and lockfile currently do not include @clerk/nextjs. No dependency changes have been made.
 
 ## Additional implementation constraints
@@ -91,3 +91,18 @@ The native third-party integration is preferred. The older Clerk JWT-template in
 - Preserve trigger behavior that prevents Super Admin deletion, protects the last active admin, and synchronizes admin-chat membership. Test role changes and membership synchronization after changing the identity helper.
 - Keep the existing Supabase Auth records intact during the initial migration. The FK issue is limited to the application profile table; there is no justification to delete or rewrite legacy Auth users as part of the Clerk cutover.
 - The prior GitHub code-search endpoint returned default-branch matches, not branch-pinned results. Treat those search hits as discovery hints only; implementation review must use files fetched from feature/clerk-auth-migration.
+
+
+## Live policy coverage captured for migration planning
+
+Identity-sensitive public policies in the live catalog include: attendance_records; excuses (insert/read/update); group_members (read); group_messages (insert); groups (read); message_recipients (read); messages (read); notification_preferences (own insert/select/update); notifications (own delete/select/update); photos (insert/read); profiles (read/update); and spiritual_journal_entries (own delete/insert/read/update). Admin-only policies generally call `is_admin()` and must remain behaviorally equivalent after the identity bridge.
+
+Storage policies currently comprise: avatars own insert/delete; gallery own insert and admin delete; meeting admin insert/delete; and team-files read for the three buckets. The own-folder checks compare the first path segment with `auth.uid()::text`; preserve that exact ownership boundary after migration. Public-read policies on albums, meeting content, and the team-files bucket are not identity checks and should not be needlessly rewritten.
+
+## Important distinction found in trigger logic
+
+`protect_profile_columns()` and `protect_role_changes()` use the authenticated actor identity, so their checks must resolve the Clerk subject to the existing profile UUID. `prevent_super_admin_delete()` and `protect_last_admin()` protect row invariants independent of the caller identity and should retain their current invariant logic. `sync_admin_chat_membership()` maintains the admin group based on the target profile's role and active state; it should not be changed to derive the target user from the actor identity.
+
+## Authentication flow findings from branch-pinned code
+
+The current login and registration pages call Supabase Auth directly. Registration relies on the `auth.users` trigger to create `profiles`, stores signup fields in Supabase user metadata, and uploads an avatar under a path beginning with the Supabase user UUID. Password reset and email callback also rely on Supabase Auth. The server guard and request proxy likewise read Supabase sessions. Therefore Clerk migration must replace all of these together with a staged compatibility path; simply swapping the login form is insufficient.

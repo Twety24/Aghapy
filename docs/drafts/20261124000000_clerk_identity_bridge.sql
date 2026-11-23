@@ -41,10 +41,16 @@ stable
 security definer
 set search_path = ''
 as $function$
-  select link.profile_id
-  from private.clerk_profile_links as link
-  where link.clerk_user_id = (select auth.jwt() ->> 'sub')
-  limit 1;
+  select case
+    when (select auth.jwt() ->> 'iss') = 'https://amyklgnqibkiynjthqlv.supabase.co/auth/v1'
+      then nullif((select auth.jwt() ->> 'sub'), '')::uuid
+    else (
+      select link.profile_id
+      from private.clerk_profile_links as link
+      where link.clerk_user_id = (select auth.jwt() ->> 'sub')
+      limit 1
+    )
+  end;
 $function$;
 
 revoke all on function private.current_profile_id() from public, anon;

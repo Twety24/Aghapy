@@ -21,6 +21,7 @@ Status: planning/audit only. This document is on `feature/clerk-auth-migration`.
 - Confirmed email addresses: 48 of 48.
 - `public.profiles`: 47 rows at the time of the initial count.
 - One auth user has no matching profile. No profile row was found without a matching auth user.
+- The `on_auth_user_created` AFTER INSERT trigger is currently installed and calls `public.handle_new_user()`; the reason this existing auth row has no profile is still unknown (for example, it may predate the current trigger state or its profile may have been removed later). The audit has not established which explanation is correct.
 - This unmatched account is not to be deleted, silently linked, or guessed. It needs a deliberate resolution path before cutover.
 - Public RLS policies directly use `auth.uid()` for member ownership in attendance, excuses, group membership/messages, message recipients, notifications, photos, profiles, and spiritual journal entries.
 - Existing private admin helpers `private.is_admin()`, `private.is_group_member()`, `private.is_super_admin()`, `private.is_senior_admin()`, and `private.is_admin_chat_group()` rely directly or indirectly on the Supabase UUID identity.

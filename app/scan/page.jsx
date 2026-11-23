@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import AppPageShell from '@/components/AppPageShell'
+import Link from 'next/link'
 import jsQR from 'jsqr'
 import { useT } from '@/components/LangProvider'
 

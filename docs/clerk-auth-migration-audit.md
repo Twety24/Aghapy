@@ -127,3 +127,11 @@ The current login and registration pages call Supabase Auth directly. Registrati
 - Added `docs/drafts/20261124000000_clerk_identity_bridge.sql`. It is deliberately outside `supabase/migrations`; it drafts the mapping table, JWT-subject lookup, removal of only the application-level `profiles.id -> auth.users.id` FK, and a service-role-only member provisioning function. It does not alter any live database state and does not yet replace RLS/RPC/Storage identity checks.
 - The legacy `on_auth_user_created` trigger is intentionally preserved in the draft. Existing Supabase Auth users and their UUIDs remain untouched; the FK removal is needed only to permit future Clerk-only profile UUIDs.
 - Supabase's current Clerk guide requires the Clerk session token to carry `role: 'authenticated'` for the Supabase Data API and shows passing Clerk's session token through the Supabase client's `accessToken` option. The native Third-Party Auth integration must be verified in the actual Supabase project before any JWT-based database helper is relied upon.
+
+
+## Dual-session compatibility refinement
+
+- The identity helper draft now distinguishes the legacy Supabase Auth issuer (`https://amyklgnqibkiynjthqlv.supabase.co/auth/v1`) from Clerk-issued sessions. Legacy Supabase sessions continue resolving their existing UUID subject directly; Clerk sessions resolve only through `private.clerk_profile_links`.
+- This permits a controlled overlap/rollback window instead of immediately invalidating all current Supabase sessions when the mapping helper is introduced. The exact issuer must be verified against a real legacy JWT in staging before the helper is promoted to a migration.
+- An unknown Clerk subject intentionally resolves to NULL. It must never fall back to a browser-supplied profile UUID or an email-only lookup during normal requests.
+- Both SQL drafts were updated to include this compatibility behavior; neither has been executed against any database.

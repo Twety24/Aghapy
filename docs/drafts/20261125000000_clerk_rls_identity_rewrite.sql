@@ -15,13 +15,11 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
   select exists (
     select 1 from public.profiles
-    where id = private.current_profile_id()
-      and role = 'admin'
-      and is_active
+    where id = private.current_profile_id() and role = 'admin' and is_active
   );
 $function$;
 
@@ -30,12 +28,11 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
   select exists (
     select 1 from public.group_members
-    where group_id = gid
-      and user_id = private.current_profile_id()
+    where group_id = gid and user_id = private.current_profile_id()
   );
 $function$;
 
@@ -63,11 +60,12 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
   select exists (
-    select 1 from public.profiles
-    where id = private.current_profile_id()
+    select 1
+    from public.profiles
+    where id = (select private.current_profile_id())
       and is_root
       and role = 'admin'
       and is_active
@@ -149,30 +147,23 @@ create or replace function public.protect_profile_columns()
 returns trigger
 language plpgsql
 security definer
-set search_path = ''
+set search_path to 'public'
 as $function$
 begin
   if private.current_profile_id() is not null then
-    new.id := old.id;
-    new.email := old.email;
-    new.is_root := old.is_root;
-    if not private.is_admin() then
-      new.role := old.role;
-      new.is_active := old.is_active;
-    end if;
+    new.id := old.id; new.email := old.email; new.is_root := old.is_root;
+    if not public.is_admin() then new.role := old.role; new.is_active := old.is_active; end if;
   end if;
   return new;
-end;
-$function$;
+end $function$;
 
 create or replace function public.protect_role_changes()
 returns trigger
 language plpgsql
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
 declare
-  v_actor_id uuid := private.current_profile_id();
   actor_is_admin boolean := false;
 begin
   if new.is_root is distinct from old.is_root then
@@ -187,16 +178,16 @@ begin
     raise exception 'لا يمكن تغيير أو إيقاف حساب Super Admin';
   end if;
 
-  if v_actor_id is null then
+  if private.current_profile_id() is null then
     return new;
   end if;
 
   select coalesce(p.role = 'admin' and p.is_active, false)
     into actor_is_admin
   from public.profiles p
-  where p.id = v_actor_id;
+  where p.id = (select private.current_profile_id());
 
-  if actor_is_admin and v_actor_id = old.id and (
+  if actor_is_admin and private.current_profile_id() = old.id and (
     new.role is distinct from old.role
     or new.admin_level is distinct from old.admin_level
     or new.is_active is distinct from old.is_active
@@ -230,13 +221,13 @@ begin
 end;
 $function$;
 
--- Recreate RPCs with actor identity resolved from the verified JWT mapping.
+-- RPC definitions below preserve the live definitions; only auth.uid() identity lookups are replaced.
 create or replace function public.get_photos(p_album uuid)
-returns table(id uuid, path text, status text, created_at timestamptz, uploader_name text, mine boolean)
+returns table(id uuid, path text, status text, created_at timestamp with time zone, uploader_name text, mine boolean)
 language sql
 stable
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
   select p.id, p.path, p.status, p.created_at,
          case when p.is_anonymous or p.uploaded_by is null then null else pr.full_name end,
@@ -249,11 +240,11 @@ as $function$
 $function$;
 
 create or replace function public.group_chat(p_group uuid)
-returns table(id uuid, body text, created_at timestamptz, sender_name text, mine boolean)
+returns table(id uuid, body text, created_at timestamp with time zone, sender_name text, mine boolean)
 language sql
 stable
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
   select *
   from (
@@ -273,25 +264,23 @@ create or replace function public.mark_message_read(p_recipient_id uuid)
 returns void
 language sql
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
   update public.message_recipients
   set read_at = now()
-  where id = p_recipient_id
-    and user_id = private.current_profile_id()
-    and read_at is null;
+  where id = p_recipient_id and user_id = private.current_profile_id() and read_at is null;
 $function$;
 
 create or replace function public.send_message(p_title text, p_body text, p_user_ids uuid[])
 returns uuid
 language plpgsql
 security definer
-set search_path = ''
+set search_path to ''
 as $function$
 declare
   mid uuid;
 begin
-  if not private.is_admin() then
+  if not public.is_admin() then
     raise exception 'not allowed';
   end if;
   if coalesce(trim(p_title), '') = '' or coalesce(trim(p_body), '') = '' then
@@ -320,7 +309,6 @@ commit;
 --    change; do not rename existing object paths or bucket contents.
 -- E. Audit EXECUTE grants on SECURITY DEFINER RPCs separately. This draft does
 --    not change grants and does not widen access.
--- F. Audit all additional application functions/triggers that call auth.uid()
---    beyond the seven functions reviewed in this draft.
+-- F. The live catalog inspection found the six public and three private auth.uid()-dependent functions listed in the audit. Re-run the inventory after implementation to catch newly added functions.
 -- G. The send_message/group_chat/get_photos/mark_message_read RPC signatures
 --    are preserved; client-supplied sender IDs must not be trusted.

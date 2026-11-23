@@ -39,7 +39,7 @@ export default function SpiritualJournalPage() {
       setEntries(mapped)
     }
     setLoading(false)
-  }, [weekStart])
+  }, [weekStart, en])
 
   useEffect(() => { loadWeek() }, [loadWeek])
 

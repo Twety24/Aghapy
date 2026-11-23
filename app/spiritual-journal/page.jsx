@@ -32,7 +32,7 @@ export default function SpiritualJournalPage() {
     setError('')
     const response = await fetch('/api/spiritual-journal?weekStart=' + weekStart, { cache: 'no-store' })
     const result = await response.json().catch(() => ({}))
-    if (!response.ok) setError(result.message || '{en ? 'Could not load the journal.' : 'تعذر تحميل النوتة.'}')
+    if (!response.ok) setError(result.message || (en ? 'Could not load the journal.' : 'تعذر تحميل النوتة.'))
     else {
       const mapped = {}
       for (const entry of result.entries || []) mapped[entry.entry_date] = { ...EMPTY_ENTRY, ...entry }
@@ -59,7 +59,7 @@ export default function SpiritualJournalPage() {
     const result = await response.json().catch(() => ({}))
     setSaving('')
     if (!response.ok) {
-      setError(result.message || '{en ? 'Could not save this change.' : 'ماقدرناش نحفظ التغيير.'}')
+      setError(result.message || (en ? 'Could not save this change.' : 'ماقدرناش نحفظ التغيير.'))
       await loadWeek()
       return
     }
@@ -119,7 +119,7 @@ export default function SpiritualJournalPage() {
               <article key={date} className={`rounded-[1.6rem] border p-4 shadow-sm transition ${isToday ? 'border-[#8b77bd] bg-[#fbf9ff] ring-2 ring-[#e9e2f6]' : 'border-[#e8ecf3] bg-white'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg font-black ${hasActivity ? 'bg-[#e8e0f5] text-[#6b5293]' : 'bg-[#f0f3f8] text-[#68758d]'}`}>{day.short}</span>
+                    <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg font-black ${hasActivity ? 'bg-[#e8e0f5] text-[#6b5293]' : 'bg-[#f0f3f8] text-[#68758d]'}`}>{en ? day.shortEn : day.short}</span>
                     <div><h2 className="font-extrabold">{en ? day.labelEn : day.label}</h2><p className="text-xs text-[#8994a9]">{date}</p></div>
                   </div>
                   {isToday && <span className="rounded-full bg-[#eee8fa] px-3 py-1 text-[10px] font-bold text-[#6b5293]">{en ? 'Today' : 'النهارده'}</span>}
@@ -138,12 +138,12 @@ export default function SpiritualJournalPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {AGPEYA_HOURS.map(hour => {
                       const active = entry.agpeya_hours.includes(hour.id)
-                      return <button key={hour.id} disabled={saving === date || isFuture} onClick={() => toggleHour(date, hour.id)} title={hour.sub} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${active ? 'border-[#705b91] bg-[#705b91] text-white' : 'border-[#e4dced] bg-white text-[#6e6080] hover:border-[#9a84bb]'} disabled:opacity-50`}>{en ? hour.labelEn : hour.label}</button>
+                      return <button key={hour.id} disabled={saving === date || isFuture} onClick={() => toggleHour(date, hour.id)} title={en ? hour.subEn : hour.sub} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${active ? 'border-[#705b91] bg-[#705b91] text-white' : 'border-[#e4dced] bg-white text-[#6e6080] hover:border-[#9a84bb]'} disabled:opacity-50`}>{en ? hour.labelEn : hour.label}</button>
                     })}
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[11px] text-[#9aa4b7]">
-                  <span>{isFuture ? '{en ? 'Not yet' : 'اليوم لسه مجاش'}' : hasActivity ? '{en ? 'Nice step recorded' : 'خطوة حلوة اتسجلت'}' : '{en ? 'Ready when you are' : 'لسه مستني خطوتك'}'}</span>
+                  <span>{isFuture ? (en ? 'Not yet' : 'اليوم لسه مجاش') : hasActivity ? (en ? 'Nice step recorded' : 'خطوة حلوة اتسجلت') : (en ? 'Ready when you are' : 'لسه مستني خطوتك')}</span>
                   <span>{saving === date ? '{en ? 'Saving...' : 'بيحفظ...'}' : saved === date ? '{en ? 'Saved ✓' : 'اتحفظت ✓'}' : '{en ? 'Auto-saved' : 'حفظ تلقائي'}'}</span>
                 </div>
               </article>

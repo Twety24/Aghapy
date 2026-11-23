@@ -102,7 +102,7 @@ export default function ScanPage() {
   const ok = result && (result.code === 'ok' || result.code === 'already')
 
   return (
-    <AppPageShell title={c.title} eyebrow="AGHAPY · CHECK-IN" description={c.hint} icon="scan" theme="blue">
+    <AppPageShell title={c.title} eyebrow="AGHAPY · CHECK-IN" description={c.hint} icon="scan" theme="blue" backLabel={c.back}>
       {state !== 'done' && state !== 'denied' && (
         <>
           <div className="mt-6 overflow-hidden rounded-3xl ring-4 ring-sky/40">

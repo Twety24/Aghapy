@@ -16,7 +16,7 @@ export async function GET(request) {
   const weekEnd = end.toISOString().slice(0, 10)
   const { data, error } = await db.from('spiritual_journal_entries')
     .select('id,entry_date,bible_reading,attended_liturgy,prayed,agpeya_hours,reflection')
-    .gte('entry_date', weekStart).lte('entry_date', weekEnd).order('entry_date')
+    .eq('user_id', user.id).gte('entry_date', weekStart).lte('entry_date', weekEnd).order('entry_date')
   if (error) return fail('تعذر تحميل النوتة.', 500)
   return NextResponse.json({ entries: data || [] })
 }

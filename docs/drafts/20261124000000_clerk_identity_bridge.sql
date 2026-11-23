@@ -111,6 +111,10 @@ begin
     raise exception 'Invalid department';
   end if;
 
+  -- Serialize normalized-email checks so two simultaneous Clerk sign-ups
+  -- cannot both pass the duplicate check before either insert commits.
+  perform pg_advisory_xact_lock(hashtextextended(v_email, 0));
+
   if exists (
     select 1 from public.profiles p
     where lower(btrim(p.email)) = v_email

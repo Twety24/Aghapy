@@ -61,7 +61,7 @@ export default function ProfileForm({ profile, email, addressRequired = false, p
     <form onSubmit={save} className="mt-5 space-y-4">
       <div className="text-center">
         <img src={preview || '/logo.jpg'} alt="الصورة الشخصية" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.jpg' }} className="mx-auto h-28 w-28 rounded-full border-4 border-white bg-white object-cover shadow-md" />
-        <label className="btn btn-navy mt-3 cursor-pointer">{photoRequired ? "إضافة الصورة الشخصية *" : "تغيير الصورة"}<input type="file" accept="image/jpeg,image/png,image/webp" required={photoRequired && !profile.avatar_url} className="hidden" onChange={e => { const file = e.target.files?.[0] || null; setPhoto(file); if (file) setPreview(URL.createObjectURL(file)) }} /></label>
+        <label className="btn btn-navy mt-3 cursor-pointer">{photoRequired ? "إضافة الصورة الشخصية *" : "تغيير الصورة"}<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const file = e.target.files?.[0] || null; setPhoto(file); if (file) setPreview(URL.createObjectURL(file)) }} /></label>
       </div>
       <div><label className="label">الاسم بالكامل</label><input className="input" required value={form.name} onChange={set('name')} /></div>
       <div><label className="label">رقم التليفون</label><input className="input" dir="ltr" type="tel" required value={form.phone} onChange={set('phone')} /></div>

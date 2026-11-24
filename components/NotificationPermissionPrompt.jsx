@@ -9,8 +9,8 @@ function decodeKey(value) {
   return Uint8Array.from(atob(padded.replace(/-/g, '+').replace(/_/g, '/')), char => char.charCodeAt(0))
 }
 
-export default function NotificationPermissionPrompt({ userId, initialChoice }) {
-  const [enabled, setEnabled] = useState(Boolean(initialChoice))
+export default function NotificationPermissionPrompt({ userId }) {
+  const [enabled, setEnabled] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [lang, setLang] = useState('ar')
@@ -19,8 +19,8 @@ export default function NotificationPermissionPrompt({ userId, initialChoice }) 
     setLang(document.documentElement.lang === 'en' ? 'en' : 'ar')
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription()).then(sub => {
-        if (sub) setEnabled(true)
-      }).catch(() => {})
+        setEnabled(Boolean(sub))
+      }).catch(() => setEnabled(false))
     }
   }, [])
 
@@ -46,17 +46,6 @@ export default function NotificationPermissionPrompt({ userId, initialChoice }) 
     denied: 'إشعارات الموقع مقفولة من إعدادات المتصفح. اسمح بها للموقع ثم حاول مرة أخرى.',
     failed: 'تعذر تحديث الإشعارات. تأكد من الاتصال وحاول مرة أخرى.',
     saving: 'لحظة من فضلك...'
-  }
-
-  async function savePreference(value) {
-    const db = createClient()
-    const { error } = await db.from('notification_preferences').upsert({
-      user_id: userId,
-      device_notifications_enabled: value,
-      choice_made_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
-    if (error) throw error
   }
 
   async function enableNotifications() {
@@ -94,7 +83,6 @@ export default function NotificationPermissionPrompt({ userId, initialChoice }) 
         body: { action: 'subscribe', subscription: subscription.toJSON() }
       })
       if (error) throw error
-      await savePreference(true)
       setEnabled(true)
       setMessage(copy.enabled)
     } catch (error) {
@@ -119,7 +107,6 @@ export default function NotificationPermissionPrompt({ userId, initialChoice }) 
         if (error) throw error
         await subscription.unsubscribe()
       }
-      await savePreference(false)
       setEnabled(false)
     } catch (error) {
       console.error('Push unsubscription failed:', error)

@@ -36,9 +36,9 @@ export default function NotificationPermissionPrompt({ userId }) {
     let active = true
     async function checkChoice() {
       const db = createClient()
-      const { data, error } = await db.from('notification_preferences').select('choice_made_at').eq('user_id', userId).maybeSingle()
+      const { data, error } = await db.from('notification_preferences').select('permission_prompt_dismissed_at').eq('user_id', userId).maybeSingle()
       if (!active) return
-      if (!error && data?.choice_made_at) {
+      if (!error && data?.permission_prompt_dismissed_at) {
         setVisible(false)
         return
       }
@@ -50,7 +50,7 @@ export default function NotificationPermissionPrompt({ userId }) {
             await db.from('notification_preferences').upsert({
               user_id: userId,
               device_notifications_enabled: true,
-              choice_made_at: new Date().toISOString(),
+              permission_prompt_dismissed_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }, { onConflict: 'user_id' })
             if (active) setVisible(false)
@@ -70,7 +70,7 @@ export default function NotificationPermissionPrompt({ userId }) {
     const { error } = await db.from('notification_preferences').upsert({
       user_id: userId,
       device_notifications_enabled: enabled,
-      choice_made_at: now,
+      permission_prompt_dismissed_at: now,
       updated_at: now
     }, { onConflict: 'user_id' })
     if (error) throw error

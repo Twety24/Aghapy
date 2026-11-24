@@ -56,7 +56,7 @@ export default async function Dashboard() {
           <span><span className="block font-bold">{t('home.scan')}</span><span className="text-xs opacity-90">{t('home.scanSub')}</span></span>
           <span className="ms-auto text-xl transition-transform group-hover:-translate-x-1">←</span>
         </Link>
-        {profile?.role === 'member' && <NotificationPermissionPrompt userId={user.id} />}
+        <NotificationPermissionPrompt userId={user.id} />
         <NotificationCenter items={notifications || []} userId={user.id} />
         <div className="grid grid-cols-2 gap-3">
           {cards.map(([href, key, icon, iconTone, cardTone]) => (

@@ -29,6 +29,7 @@ export default async function Dashboard() {
     db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at').eq('user_id', user.id).is('dismissed_at', null).order('created_at', { ascending: false }).limit(8),
     db.from('notification_preferences').select('device_notifications_enabled').eq('user_id', user.id).maybeSingle()
   ])
+  if (!profile?.avatar_url) redirect('/profile?complete=photo')
   if (profile?.address == null || !profile.address.trim()) redirect('/profile?complete=address')
   if (profile && !profile.is_active) return <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center"><p className="alert-error">Account suspended. Contact the administrator.</p><form action={signOut}><button className="btn btn-navy">{t('common.logout')}</button></form></main>
   const first = (profile?.full_name || '').split(' ')[0]

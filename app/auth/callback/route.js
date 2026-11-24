@@ -8,7 +8,12 @@ export async function GET(request) {
   if (code) {
     const supabase = (await createClient())
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return NextResponse.redirect(`${origin}${next.startsWith('/') ? next : '/dashboard'}`)
+    if (!error) {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data: profile } = user ? await supabase.from('profiles').select('avatar_url,address').eq('id', user.id).single() : { data: null }
+      const destination = !profile?.avatar_url ? '/profile?complete=photo' : (!profile.address?.trim() ? '/profile?complete=address' : (next.startsWith('/') ? next : '/dashboard'))
+      return NextResponse.redirect(`${origin}${destination}`)
+    }
   }
   return NextResponse.redirect(`${origin}/login`)
 }

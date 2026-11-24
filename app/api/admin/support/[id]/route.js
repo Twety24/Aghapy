@@ -16,14 +16,15 @@ export async function GET(req, { params }) {
       await db.from('admin_support_sessions').update({ status: 'expired', ended_at: new Date().toISOString() }).eq('id', id)
       await db.from('admin_support_audit').insert({ session_id: id, actor_id: context.user.id, event: 'session_expired' })
     }
-    return fail('انتهت جلسة الدعم.', 410)
+    return fail('انتهت جلسة الدعم أو ألغى العضو موافقته.', 410)
   }
-  const [{ data: member }, { data: attendance }] = await Promise.all([
+  const [{ data: member }, { data: attendance }, { data: viewed }] = await Promise.all([
     db.from('profiles').select('id,full_name,avatar_url,phone,address,birth_date,stage,department').eq('id', session.member_id).single(),
-    db.from('attendance_records').select('status,checked_in_at,attendance_sessions(meeting_date,title)').eq('user_id', session.member_id).order('checked_in_at', { ascending: false }).limit(20)
+    db.from('attendance_records').select('status,checked_in_at,attendance_sessions(meeting_date,title)').eq('user_id', session.member_id).order('checked_in_at', { ascending: false }).limit(20),
+    db.from('admin_support_audit').select('id').eq('session_id', id).eq('event', 'support_view_opened').limit(1)
   ])
   if (!member) return fail('بيانات العضو غير متاحة.', 404)
-  await db.from('admin_support_audit').insert({ session_id: id, actor_id: context.user.id, event: 'support_view_opened' })
+  if (!viewed?.length) await db.from('admin_support_audit').insert({ session_id: id, actor_id: context.user.id, event: 'support_view_opened' })
   return NextResponse.json({ session: { id: session.id, expires_at: session.expires_at }, member, attendance: attendance || [] }, { headers: { 'Cache-Control': 'no-store' } })
 }
 

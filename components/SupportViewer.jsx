@@ -9,11 +9,18 @@ export default function SupportViewer({ sessionId }) {
   async function load() {
     const res = await fetch('/api/admin/support/' + sessionId, { cache: 'no-store' })
     const json = await res.json().catch(() => ({}))
-    if (!res.ok) { setData(null); setError(json.message || 'تعذر فتح جلسة الدعم.'); return }
+    if (!res.ok) { setData(null); setError(json.message || 'تعذر فتح جلسة الدعم.'); return false }
     setError('')
     setData(json)
+    return true
   }
-  useEffect(() => { load() }, [sessionId])
+  useEffect(() => {
+    let active = true
+    const run = async () => { if (active) await load() }
+    run()
+    const interval = setInterval(run, 10000)
+    return () => { active = false; clearInterval(interval) }
+  }, [sessionId])
   useEffect(() => {
     if (!data?.session?.expires_at) return
     const remaining = new Date(data.session.expires_at).getTime() - Date.now()

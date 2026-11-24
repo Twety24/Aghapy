@@ -17,7 +17,7 @@ Deno.serve(async (req: Request) => {
  try { body = await req.json(); } catch { return reply({ error: "Invalid JSON" }, 400); }
 
  if (body.action === "subscribe" || body.action === "unsubscribe") {
-  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "");
+  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
   if (!token) return reply({ error: "Unauthorized" }, 401);
   const userClient = createClient(url, anon, { global: { headers: { Authorization: "Bearer " + token } }, auth: { persistSession: false } });
   const { data: authData, error: authError } = await userClient.auth.getUser();

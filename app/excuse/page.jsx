@@ -60,10 +60,10 @@ export default function ExcusePage(){
   const statusText=status=>status==='approved'?(en?'Approved':'تمت الموافقة'):status==='rejected'?(en?'Rejected':'مرفوض'):en?'Pending review':'قيد المراجعة'
   const statusStyle=status=>status==='approved'?'bg-emerald-100 text-emerald-800':status==='rejected'?'bg-rose-100 text-rose-800':'bg-amber-100 text-amber-800'
   return <AppPageShell title={t('exc.title')} eyebrow="AGHAPY · ATTENDANCE" description={en?'Send a note to the team if you cannot make a meeting.':'لو مش هتقدر تحضر اجتماع، ابعت توضيح للفريق.'} icon="excuse" theme="rose" backLabel={en?"Back":"رجوع"}>
-    <form onSubmit={submit} className="space-y-4 rounded-[1.5rem] border border-[#f0e4e9] bg-white p-5 shadow-sm">
+    <form onSubmit={submit} className="space-y-4 rounded-[1.5rem] border border-[#10265a1a] bg-white p-5 shadow-sm">
       <div><label className="label">{en?'Meeting date':'تاريخ الاجتماع'}</label><input className="input" type="date" required value={date} onChange={e=>setDate(e.target.value)}/></div>
-      <div><label className="label">{en?'Reason':'سبب الاعتذار'}</label><textarea className="input min-h-36 resize-y" value={reason} onChange={e=>setReason(e.target.value)} placeholder={t('exc.placeholder')} required minLength={3} maxLength={1000}/><p className="mt-1 text-xs text-[#8994a9]">{reason.length}/1000</p></div>
-      {msg&&<p className={`rounded-xl p-3 text-sm ${success?'bg-emerald-50 text-emerald-800':'bg-[#f8f2f4] text-[#8a4560]'}`} role="status">{msg}</p>}
+      <div><label className="label">{en?'Reason':'سبب الاعتذار'}</label><textarea className="input min-h-36 resize-y" value={reason} onChange={e=>setReason(e.target.value)} placeholder={t('exc.placeholder')} required minLength={3} maxLength={1000}/><p className="mt-1 text-xs text-[#71809a]">{reason.length}/1000</p></div>
+      {msg&&<p className={`rounded-xl p-3 text-sm ${success?'bg-emerald-50 text-emerald-800':'bg-[#fce8ea] text-[#d92d3a]'}`} role="status">{msg}</p>}
       <button type="submit" className="btn btn-red" disabled={busy}>{busy?(en?'Sending...':'جاري الإرسال...'):t('exc.submit')}</button>
     </form>
     <section className="space-y-3">

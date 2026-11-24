@@ -1,6 +1,7 @@
 import { IBM_Plex_Sans_Arabic } from 'next/font/google'
 import './globals.css'
 import RegisterSW from '@/components/RegisterSW'
+import InstallPrompt from '@/components/InstallPrompt'
 import { LangProvider } from '@/components/LangProvider'
 import { getLang } from '@/lib/lang'
 
@@ -23,6 +24,7 @@ export default async function RootLayout({ children }) {
           </footer>
         </LangProvider>
         <RegisterSW />
+        <InstallPrompt />
       </body>
     </html>
   )

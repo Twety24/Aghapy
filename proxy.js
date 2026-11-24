@@ -1,21 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-const PUBLIC = ['/login', '/register', '/forgot-password', '/reset-password', '/auth']
-
-function withCookies(url, response) {
-  const redirect = NextResponse.redirect(url)
-  response.cookies.getAll().forEach(cookie => redirect.cookies.set(cookie))
-  return redirect
-}
-
 export async function proxy(request) {
-  const path = request.nextUrl.pathname
-  const isCron = path === '/api/cron' || path.startsWith('/api/cron/')
-  const isPublic = PUBLIC.some(p => path === p || path.startsWith(p + '/'))
-  const isAuthPage = path === '/login' || path === '/register'
-
-  if (isCron) return NextResponse.next({ request })
+  const { pathname } = request.nextUrl
+  const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/auth/callback']
+  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(route + '/')) || pathname === '/profile') {
+    return NextResponse.next()
+  }
 
   let response = NextResponse.next({ request })
   const supabase = createServerClient(
@@ -24,26 +15,34 @@ export async function proxy(request) {
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
-        setAll(list) {
-          list.forEach(({ name, value }) => request.cookies.set(name, value))
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           response = NextResponse.next({ request })
-          list.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
         }
       }
     }
   )
-  const { data, error } = await supabase.auth.getClaims()
-  const userId = !error ? data?.claims?.sub : null
 
-  if (!userId) {
-    if (isPublic) return response
-    return withCookies(new URL('/login', request.url), response)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return response
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('avatar_url')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profile && !profile.avatar_url) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/profile'
+    url.searchParams.set('complete', 'photo')
+    return NextResponse.redirect(url)
   }
 
-  if (isAuthPage) return withCookies(new URL('/dashboard', request.url), response)
   return response
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.jpg|icons|manifest.json|sw.js).*)']
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|manifest.json|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)']
 }

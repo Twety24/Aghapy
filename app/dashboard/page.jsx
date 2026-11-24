@@ -24,10 +24,9 @@ export default async function Dashboard() {
   const db = await createClient()
   const { data: { user } } = await db.auth.getUser()
   if (!user) redirect('/login')
-  const [{ data: profile }, { data: notifications }, { data: notificationPreference }] = await Promise.all([
+  const [{ data: profile }, { data: notifications }] = await Promise.all([
     createAdminClient().from('profiles').select('full_name,role,is_active,avatar_url,address').eq('id', user.id).single(),
-    db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at').eq('user_id', user.id).is('dismissed_at', null).order('created_at', { ascending: false }).limit(8),
-    db.from('notification_preferences').select('device_notifications_enabled').eq('user_id', user.id).maybeSingle()
+    db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at').eq('user_id', user.id).is('dismissed_at', null).order('created_at', { ascending: false }).limit(8)
   ])
   if (!profile?.avatar_url) redirect('/profile?complete=photo')
   if (profile?.address == null || !profile.address.trim()) redirect('/profile?complete=address')
@@ -57,7 +56,7 @@ export default async function Dashboard() {
           <span><span className="block font-bold">{t('home.scan')}</span><span className="text-xs opacity-90">{t('home.scanSub')}</span></span>
           <span className="ms-auto text-xl transition-transform group-hover:-translate-x-1">←</span>
         </Link>
-        {profile?.role === 'member' && <NotificationPermissionPrompt userId={user.id} initialChoice={notificationPreference ? notificationPreference.device_notifications_enabled : null} />}
+        {profile?.role === 'member' && <NotificationPermissionPrompt userId={user.id} />}
         <NotificationCenter items={notifications || []} userId={user.id} />
         <div className="grid grid-cols-2 gap-3">
           {cards.map(([href, key, icon, iconTone, cardTone]) => (

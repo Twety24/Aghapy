@@ -6,7 +6,6 @@ import { getGmailConnection } from '@/lib/gmail'
 import SettingsForm from '@/components/SettingsForm'
 import GmailConnectButton from '@/components/GmailConnectButton'
 import StorageCleanupButton from '@/components/StorageCleanupButton'
-import NotificationPermissionPrompt from '@/components/NotificationPermissionPrompt'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +13,6 @@ export default async function Page({searchParams}) {
   if (!(await getSeniorAdmin())) redirect('/admin/attendance')
   const params=await searchParams
   const db = await createClient()
-  const { data: { user } } = await db.auth.getUser()
   const [{ data: settings }, { data: admins }, gmail] = await Promise.all([
     db.from('settings').select('value').eq('key', 'admin_report_email').maybeSingle(),
     db.from('profiles').select('id, full_name').eq('role', 'admin').eq('is_active', true),
@@ -43,7 +41,6 @@ export default async function Page({searchParams}) {
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">الإعدادات</h1>
       <SettingsForm initial={settings?.value || ''} />
-      {user && <NotificationPermissionPrompt userId={user.id} />}
       <GmailConnectButton connected={!!gmail} email={gmail?.gmail_address}/>
       {params?.gmail&&statusText[params.gmail]&&<p className={params.gmail==='connected'?'alert-ok':'alert-error'} role="status">{statusText[params.gmail]}</p>}
       <StorageCleanupButton />

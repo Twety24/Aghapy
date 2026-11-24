@@ -1,18 +1,70 @@
 'use client'
-import {useEffect,useState} from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import {useRouter} from 'next/navigation'
-import {createClient} from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import FeatureIcon from '@/components/FeatureIcon'
-export default function NotificationCenter({items,userId}){
- const router=useRouter()
- const[db]=useState(()=>createClient())
- const[list,setList]=useState(items)
- const[removing,setRemoving]=useState(new Set())
- const[startX,setStartX]=useState(null)
- useEffect(()=>{const channel=db.channel('user-notifications-'+userId).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+userId},async payload=>{const{data}=await db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at').eq('id',payload.new.id).maybeSingle();if(data){setList(current=>[data,...current.filter(x=>x.id!==data.id)].slice(0,8));if('Notification'in window&&Notification.permission==='granted'){const registration=await navigator.serviceWorker?.ready;registration?.showNotification(data.title,{body:data.body,icon:'/icons/icon-192.png',badge:'/icons/icon-192.png',data:{url:data.href}})}}}).subscribe();return()=>{db.removeChannel(channel)}},[db,userId])
- async function dismiss(id){setRemoving(current=>new Set(current).add(id));setTimeout(async()=>{await db.from('notifications').delete().eq('id',id);setList(current=>current.filter(x=>x.id!==id));setRemoving(current=>{const n=new Set(current);n.delete(id);return n});router.refresh()},230)}
- async function openNotification(item){if(!item.read_at)await db.from('notifications').update({read_at:new Date().toISOString()}).eq('id',item.id)}
- if(!list.length)return null
- return <section className="space-y-2" aria-label="الإشعارات"><div className="flex items-center justify-between px-1"><h2 className="text-sm font-bold text-navy">آخر الإشعارات</h2></div><ul className="space-y-2">{list.map(item=>{const icon=item.notification_type==='photo'?'photos':item.notification_type==='meeting'?'meeting':item.notification_type==='group_message'?'chats':'notifications';return <li key={item.id} onTouchStart={e=>setStartX(e.touches[0].clientX)} onTouchEnd={e=>{if(startX!==null&&Math.abs(e.changedTouches[0].clientX-startX)>75)dismiss(item.id);setStartX(null)}} className={`notification-item rounded-2xl bg-white p-3 shadow-sm ring-1 ring-navy/10 ${removing.has(item.id)?'notification-dismiss':''}`}><div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ice text-navy"><FeatureIcon name={icon} className="h-5 w-5"/></span><div className="min-w-0 flex-1"><Link href={item.href||'/messages'} onClick={()=>openNotification(item)} className="block"><span className="flex items-center gap-2"><span className={`text-sm ${item.read_at?'font-medium':'font-bold'}`}>{item.title}</span>{!item.read_at&&<span className="h-2 w-2 rounded-full bg-stage"/>}</span><p className="mt-1 line-clamp-2 text-xs leading-5 text-navy/65">{item.body}</p></Link></div><button onClick={()=>dismiss(item.id)} aria-label="حذف الإشعار" className="shrink-0 rounded-lg px-2 py-1 text-lg text-navy/35 transition hover:bg-ice hover:text-stage">×</button></div></li>})}</ul><p className="px-1 text-[10px] text-navy/45">اسحب الإشعار للجانب لإخفائه.</p></section>
+
+export default function NotificationCenter({ items, userId }) {
+  const router = useRouter()
+  const [db] = useState(() => createClient())
+  const [list, setList] = useState(items)
+  const [removing, setRemoving] = useState(new Set())
+  const [startX, setStartX] = useState(null)
+
+  useEffect(() => {
+    const channel = db.channel('user-notifications-' + userId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + userId }, async payload => {
+        const { data } = await db.from('notifications').select('id,notification_type,title,body,href,created_at,read_at').eq('id', payload.new.id).maybeSingle()
+        if (data) setList(current => [data, ...current.filter(item => item.id !== data.id)].slice(0, 8))
+      })
+      .subscribe()
+    return () => { db.removeChannel(channel) }
+  }, [db, userId])
+
+  async function dismiss(id) {
+    setRemoving(current => new Set(current).add(id))
+    setTimeout(async () => {
+      await db.from('notifications').delete().eq('id', id)
+      setList(current => current.filter(item => item.id !== id))
+      setRemoving(current => {
+        const next = new Set(current)
+        next.delete(id)
+        return next
+      })
+      router.refresh()
+    }, 230)
+  }
+
+  async function openNotification(item) {
+    if (!item.read_at) await db.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', item.id)
+  }
+
+  if (!list.length) return null
+
+  return (
+    <section className="space-y-2" aria-label="الإشعارات">
+      <div className="flex items-center justify-between px-1"><h2 className="text-sm font-bold text-navy">آخر الإشعارات</h2></div>
+      <ul className="space-y-2">
+        {list.map(item => {
+          const icon = item.notification_type === 'photo' ? 'photos' : item.notification_type === 'meeting' ? 'meeting' : item.notification_type === 'group_message' ? 'chats' : 'notifications'
+          return (
+            <li key={item.id} onTouchStart={event => setStartX(event.touches[0].clientX)} onTouchEnd={event => { if (startX !== null && Math.abs(event.changedTouches[0].clientX - startX) > 75) dismiss(item.id); setStartX(null) }} className={'notification-item rounded-2xl bg-white p-3 shadow-sm ring-1 ring-navy/10 ' + (removing.has(item.id) ? 'notification-dismiss' : '')}>
+              <div className="flex items-start gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ice text-navy"><FeatureIcon name={icon} className="h-5 w-5" /></span>
+                <div className="min-w-0 flex-1">
+                  <Link href={item.href || '/messages'} onClick={() => openNotification(item)} className="block">
+                    <span className="flex items-center gap-2"><span className={'text-sm ' + (item.read_at ? 'font-medium' : 'font-bold')}>{item.title}</span>{!item.read_at && <span className="h-2 w-2 rounded-full bg-stage" />}</span>
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-navy/65">{item.body}</p>
+                  </Link>
+                </div>
+                <button onClick={() => dismiss(item.id)} aria-label="حذف الإشعار" className="shrink-0 rounded-lg px-2 py-1 text-lg text-navy/35 transition hover:bg-ice hover:text-stage">×</button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="px-1 text-[10px] text-navy/45">اسحب الإشعار للجانب لإخفائه.</p>
+    </section>
+  )
 }

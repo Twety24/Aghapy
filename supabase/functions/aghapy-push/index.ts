@@ -26,6 +26,9 @@ Deno.serve(async (req: Request) => {
   if (body.action === "subscribe") {
    const sub = body.subscription as { endpoint?: string; keys?: { p256dh?: string; auth?: string } } | undefined;
    if (!sub?.endpoint?.startsWith("https://") || !sub.keys?.p256dh || !sub.keys?.auth) return reply({ error: "Invalid subscription" }, 400);
+   const { data: existing, error: lookupError } = await admin.from("push_subscriptions").select("user_id").eq("endpoint", sub.endpoint).maybeSingle();
+   if (lookupError) return reply({ error: "Could not verify subscription" }, 500);
+   if (existing && existing.user_id !== authData.user.id) return reply({ error: "Subscription already belongs to another account" }, 409);
    const { error } = await admin.from("push_subscriptions").upsert({
     user_id: authData.user.id, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth, updated_at: new Date().toISOString()
    }, { onConflict: "endpoint" });
@@ -49,9 +52,6 @@ Deno.serve(async (req: Request) => {
 
  const { data: notification } = await admin.from("notifications").select("id,user_id,title,body,href").eq("id", notificationId).maybeSingle();
  if (!notification) return reply({ error: "Notification not found" }, 404);
- const { data: preference } = await admin.from("notification_preferences").select("device_notifications_enabled").eq("user_id", notification.user_id).maybeSingle();
- if (!preference?.device_notifications_enabled) return reply({ ok: true, sent: 0 });
-
  const { data: subscriptions, error: subError } = await admin.from("push_subscriptions").select("endpoint,p256dh,auth").eq("user_id", notification.user_id);
  if (subError) return reply({ error: "Could not load subscriptions" }, 500);
  if (!subscriptions?.length) return reply({ ok: true, sent: 0 });

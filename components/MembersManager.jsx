@@ -12,7 +12,7 @@ const birthDate = (value) => {
 }
 
 export default function MembersManager() {
-  const {lang}=useT();const en=lang==='en';const c=en?{unregistered:'Not provided',loadError:'Unable to load members.',updateError:'The update could not be completed.',rename:'New name',members:'Members',export:'Export Excel',search:'Search by name, email, phone, or address',root:'You are the Super Admin. You can manage all administrators, and your account is protected from permission changes.',admin:'You can promote members to administrators or remove administrator access from other administrators. The Super Admin account is protected.',administrator:'Administrator',suspended:'Suspended',phone:'Phone',address:'Address',dob:'Date of birth',stage:'Education stage',department:'Department',edit:'Edit name',history:'Attendance history',promote:'Promote to administrator',demote:'Remove administrator access',disable:'Suspend',enable:'Activate',present:'Present',absent:'Absent',noHistory:'No attendance records yet.',undefined:'Not specified'}:{unregistered:'غير مسجل',loadError:'تعذر تحميل الأعضاء.',updateError:'ماقدرناش ننفّذ التعديل.',rename:'الاسم الجديد',members:'الأعضاء',export:'تصدير Excel',search:'ابحث بالاسم أو البريد أو التليفون أو العنوان',root:'أنت Super Admin. تقدر تدير كل الأدمنز، وحسابك محمي من أي تعديل في الصلاحيات.',admin:'تقدر ترقّي أي عضو لأدمن أو تشيل صلاحية الأدمن من أي أدمن آخر. حساب Super Admin محمي.',administrator:'أدمن',suspended:'موقوف',phone:'التليفون',address:'العنوان',dob:'تاريخ الميلاد',stage:'المرحلة',department:'القسم',edit:'تعديل الاسم',history:'سجل الحضور',promote:'ترقية لأدمن',demote:'إزالة صلاحية الأدمن',disable:'إيقاف',enable:'تفعيل',present:'حاضر',absent:'غائب',noHistory:'مفيش سجل لسه.',undefined:'غير محدد'};
+  const {lang}=useT();const en=lang==='en';const supportLabel=en?'Request support':'طلب وضع الدعم';const c=en?{unregistered:'Not provided',loadError:'Unable to load members.',updateError:'The update could not be completed.',rename:'New name',members:'Members',export:'Export Excel',search:'Search by name, email, phone, or address',root:'You are the Super Admin. You can manage all administrators, and your account is protected from permission changes.',admin:'You can promote members to administrators or remove administrator access from other administrators. The Super Admin account is protected.',administrator:'Administrator',suspended:'Suspended',phone:'Phone',address:'Address',dob:'Date of birth',stage:'Education stage',department:'Department',edit:'Edit name',history:'Attendance history',promote:'Promote to administrator',demote:'Remove administrator access',disable:'Suspend',enable:'Activate',present:'Present',absent:'Absent',noHistory:'No attendance records yet.',undefined:'Not specified'}:{unregistered:'غير مسجل',loadError:'تعذر تحميل الأعضاء.',updateError:'ماقدرناش ننفّذ التعديل.',rename:'الاسم الجديد',members:'الأعضاء',export:'تصدير Excel',search:'ابحث بالاسم أو البريد أو التليفون أو العنوان',root:'أنت Super Admin. تقدر تدير كل الأدمنز، وحسابك محمي من أي تعديل في الصلاحيات.',admin:'تقدر ترقّي أي عضو لأدمن أو تشيل صلاحية الأدمن من أي أدمن آخر. حساب Super Admin محمي.',administrator:'أدمن',suspended:'موقوف',phone:'التليفون',address:'العنوان',dob:'تاريخ الميلاد',stage:'المرحلة',department:'القسم',edit:'تعديل الاسم',history:'سجل الحضور',promote:'ترقية لأدمن',demote:'إزالة صلاحية الأدمن',disable:'إيقاف',enable:'تفعيل',present:'حاضر',absent:'غائب',noHistory:'مفيش سجل لسه.',undefined:'غير محدد'};
   const [rows, setRows] = useState([])
   const [permissions, setPermissions] = useState({ isRoot: false, userId: null })
   const [q, setQ] = useState('')
@@ -41,6 +41,16 @@ export default function MembersManager() {
     setBusyId(null)
     if (!res.ok) return setMsg(json.message || c.updateError)
     await load()
+  }
+
+  async function requestSupport(member) {
+    setMsg('')
+    setBusyId(member.id)
+    const res = await fetch('/api/admin/support', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ memberId: member.id }) })
+    const json = await res.json().catch(() => ({}))
+    setBusyId(null)
+    if (!res.ok) return setMsg(json.message || c.updateError)
+    setMsg(en ? 'Support request sent. The member must approve it first.' : 'تم إرسال طلب الدعم. العضو لازم يوافق عليه الأول.')
   }
 
   function rename(member) {
@@ -93,6 +103,7 @@ export default function MembersManager() {
           <div className="mt-3 flex flex-wrap gap-2">
             <button className={btn} disabled={busyId === m.id} onClick={() => rename(m)}>{c.edit}</button>
             <button className={btn} disabled={busyId === m.id} onClick={() => history(m.id)}>{c.history}</button>
+            {permissions.isRoot && m.role === 'member' && m.is_active && <button className={btn} disabled={busyId === m.id} onClick={() => requestSupport(m)}>{supportLabel}</button>}
             {m.role === 'member' && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'promote-normal')}>{c.promote}</button>}
             {m.role === 'admin' && !m.is_root && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'demote')}>{c.demote}</button>}
             {m.role === 'member' && m.id !== permissions.userId && <button className={btn} disabled={busyId === m.id} onClick={() => update(m, 'toggle-active')}>{m.is_active ? c.disable : c.enable}</button>}

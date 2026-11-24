@@ -44,7 +44,7 @@ export default async function Dashboard() {
         </div>
       </header>
       <main className="mx-auto -mt-16 max-w-md space-y-3 px-4 pb-3">
-        <section className="rounded-[1.8rem] border-0 bg-transparent px-5 pb-5 pt-4 text-center shadow-none ring-0">
+        <section className="rounded-[1.8rem] border border-white bg-white px-5 pb-5 pt-4 text-center shadow-lg ring-1 ring-navy/5">
           <AvatarImage src={profile?.avatar_url} alt="الصورة الشخصية" className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-white object-cover shadow-md" />
           <p className="mt-3 text-[10px] font-black tracking-[.24em] text-navy">AGHAPY TEAM</p>
           <h1 className="mt-1 text-2xl font-black">{t('home.hi', { name: first })}</h1>

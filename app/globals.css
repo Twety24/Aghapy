@@ -1,16 +1,19 @@
 @tailwind base;
+:root{--aghapy-navy:#10265a;--aghapy-red:#d92d3a;--aghapy-white:#ffffff;--aghapy-red-soft:#fce8ea;--aghapy-navy-soft:#e8edf7;}
 @tailwind components;
 @tailwind utilities;
 @layer components {
  .btn{@apply inline-flex w-full items-center justify-center rounded-xl px-5 py-3 font-bold transition active:scale-[.98] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy;}
- .btn-red{@apply bg-stage text-white hover:bg-red-600;}
+  .btn-red{@apply bg-stage text-white hover:bg-[#b91c2b];}
  .btn-navy{@apply bg-navy text-white hover:bg-[#0c1d45];}
- .input{@apply w-full rounded-xl border border-navy/20 bg-white px-4 py-3 text-navy placeholder:text-navy/40 focus:border-navy focus:outline-none focus:ring-2 focus:ring-sky;}
+  .input{@apply w-full rounded-xl border border-navy/20 bg-white px-4 py-3 text-navy placeholder:text-navy/40 focus:border-stage focus:outline-none focus:ring-2 focus:ring-stage/20;}
  .label{@apply mb-1 block text-sm font-medium text-navy;}
  .alert-error{@apply rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700;}
  .alert-ok{@apply rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800;}
 }
 body{@apply bg-white text-navy;}
+::selection{background:var(--aghapy-red-soft);color:var(--aghapy-navy);}
+:focus-visible{outline-color:var(--aghapy-red);}
 html[data-theme='dark'] body{background:#101827;color:#e5e7eb;}
 html[data-theme='dark'] .bg-white{background:#1b2638!important;color:#e5e7eb;}
 html[data-theme='dark'] .bg-ice{background:#111b2b!important;}
@@ -26,7 +29,7 @@ html[data-theme='dark'] .ring-navy\/10,html[data-theme='dark'] .border-navy\/10{
 .mask-sad{animation:mask-swap 2.4s ease-in-out infinite;animation-delay:-1.2s;backface-visibility:hidden;}
 .site-body{min-height:100dvh;display:flex;flex-direction:column;}
 .site-content{flex:1 0 auto;}
-.site-footer{flex-shrink:0;padding:.45rem 1.25rem;text-align:center;font-size:.68rem;line-height:1.35;color:rgb(16 38 90 / .55);border-top:1px solid rgb(16 38 90 / .08);}
+.site-footer{flex-shrink:0;padding:.45rem 1.25rem;text-align:center;font-size:.68rem;line-height:1.35;color:rgb(16 38 90 / .62);border-top:1px solid rgb(16 38 90 / .08);}
 .site-footer p+p{margin-top:.12rem;}
 html[data-theme='dark'] .site-footer{color:#aab6c8;border-color:rgb(148 163 184 / .2);}
 @keyframes menu-in{from{transform:translateX(18px);opacity:0}to{transform:translateX(0);opacity:1}}

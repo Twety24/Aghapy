@@ -8,8 +8,8 @@ import { useT } from '@/components/LangProvider'
 
 const activities = [
   { key: 'bible_reading', label: 'قراءة الكتاب المقدس', labelEn: 'Bible reading', icon: '✦', color: 'bg-[#e9f1ff] text-[#31558e]' },
-  { key: 'attended_liturgy', label: 'حضور القداس', labelEn: 'Attend liturgy', icon: '⌂', color: 'bg-[#f7eee3] text-[#8c5d2e]' },
-  { key: 'prayed', label: 'الصلاة', labelEn: 'Prayer', icon: '☼', color: 'bg-[#f1eafa] text-[#74539a]' }
+  { key: 'attended_liturgy', label: 'حضور القداس', labelEn: 'Attend liturgy', icon: '⌂', color: 'bg-[#e8edf7] text-[#10265a]' },
+  { key: 'prayed', label: 'الصلاة', labelEn: 'Prayer', icon: '☼', color: 'bg-[#fce8ea] text-[#d92d3a]' }
 ]
 
 export default function SpiritualJournalPage() {
@@ -75,9 +75,9 @@ export default function SpiritualJournalPage() {
   }
 
   return (
-    <main className="mx-auto min-h-dvh max-w-3xl bg-[#f7f8fc] px-4 pb-12 pt-5 text-[#1d2b49]">
-      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-[#61708d] hover:text-[#1d2b49]">← {en ? 'Back' : 'رجوع'}</Link>
-      <section className="relative mt-4 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#142b5a] via-[#263f78] to-[#705b91] p-6 text-white shadow-xl">
+    <main className="mx-auto min-h-dvh max-w-3xl bg-[#f7f8fc] px-4 pb-12 pt-5 text-[#10265a]">
+      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-[#52627e] hover:text-[#10265a]">← {en ? 'Back' : 'رجوع'}</Link>
+      <section className="relative mt-4 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#142b5a] via-[#263f78] to-[#d92d3a] p-6 text-white shadow-xl">
         <div className="pointer-events-none absolute -left-10 -top-12 h-44 w-44 rounded-full border border-white/10" />
         <div className="pointer-events-none absolute -bottom-16 right-8 h-48 w-48 rounded-full border-[24px] border-white/5" />
         <div className="relative flex items-start justify-between gap-4">
@@ -102,12 +102,12 @@ export default function SpiritualJournalPage() {
 
       <section className="mt-5 flex items-center justify-between rounded-2xl bg-white p-3 shadow-sm ring-1 ring-[#e6eaf2]">
         <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="rounded-xl px-3 py-2 text-sm font-bold hover:bg-[#f0f3fa]">← {en ? 'Previous week' : 'الأسبوع السابق'}</button>
-        <div className="text-center"><p className="text-xs text-[#8994a9]">{en ? 'Your week' : 'أسبوعك'}</p><p className="text-sm font-extrabold">{weekDates[0]} <span className="text-[#9aa4b7]">{en ? 'to' : 'إلى'}</span> {weekDates[6]}</p></div>
+        <div className="text-center"><p className="text-xs text-[#71809a]">{en ? 'Your week' : 'أسبوعك'}</p><p className="text-sm font-extrabold">{weekDates[0]} <span className="text-[#9aa4b7]">{en ? 'to' : 'إلى'}</span> {weekDates[6]}</p></div>
         <button disabled={isCurrentWeek} onClick={() => setWeekStart(addDays(weekStart, 7))} className="rounded-xl px-3 py-2 text-sm font-bold hover:bg-[#f0f3fa] disabled:opacity-30">{en ? 'Next week' : 'الأسبوع التالي'} →</button>
       </section>
 
       {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {loading ? <div className="mt-5 rounded-2xl bg-white p-8 text-center text-sm text-[#8994a9]">{en ? 'Getting your journal ready...' : 'بنجهّز نوتتك...'}</div> : (
+      {loading ? <div className="mt-5 rounded-2xl bg-white p-8 text-center text-sm text-[#71809a]">{en ? 'Getting your journal ready...' : 'بنجهّز نوتتك...'}</div> : (
         <section className="mt-5 grid gap-3 sm:grid-cols-2">
           {JOURNAL_DAYS.map((day, index) => {
             const date = weekDates[index]
@@ -116,13 +116,13 @@ export default function SpiritualJournalPage() {
             const isFuture = date > today
             const hasActivity = entry.bible_reading || entry.attended_liturgy || entry.prayed || entry.agpeya_hours.length
             return (
-              <article key={date} className={`rounded-[1.6rem] border p-4 shadow-sm transition ${isToday ? 'border-[#8b77bd] bg-[#fbf9ff] ring-2 ring-[#e9e2f6]' : 'border-[#e8ecf3] bg-white'}`}>
+              <article key={date} className={`rounded-[1.6rem] border p-4 shadow-sm transition ${isToday ? 'border-[#d92d3a] bg-[#fff5f6] ring-2 ring-[#f6cbd0]' : 'border-[#e8ecf3] bg-white'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg font-black ${hasActivity ? 'bg-[#e8e0f5] text-[#6b5293]' : 'bg-[#f0f3f8] text-[#68758d]'}`}>{en ? day.shortEn : day.short}</span>
-                    <div><h2 className="font-extrabold">{en ? day.labelEn : day.label}</h2><p className="text-xs text-[#8994a9]">{date}</p></div>
+                    <span className={`grid h-11 w-11 place-items-center rounded-2xl text-lg font-black ${hasActivity ? 'bg-[#fce8ea] text-[#d92d3a]' : 'bg-[#f0f3f8] text-[#68758d]'}`}>{en ? day.shortEn : day.short}</span>
+                    <div><h2 className="font-extrabold">{en ? day.labelEn : day.label}</h2><p className="text-xs text-[#71809a]">{date}</p></div>
                   </div>
-                  {isToday && <span className="rounded-full bg-[#eee8fa] px-3 py-1 text-[10px] font-bold text-[#6b5293]">{en ? 'Today' : 'النهارده'}</span>}
+                  {isToday && <span className="rounded-full bg-[#eee8fa] px-3 py-1 text-[10px] font-bold text-[#d92d3a]">{en ? 'Today' : 'النهارده'}</span>}
                 </div>
                 <div className="mt-4 space-y-2">
                   {activities.map(activity => (
@@ -138,7 +138,7 @@ export default function SpiritualJournalPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {AGPEYA_HOURS.map(hour => {
                       const active = entry.agpeya_hours.includes(hour.id)
-                      return <button key={hour.id} disabled={saving === date || isFuture} onClick={() => toggleHour(date, hour.id)} title={en ? hour.subEn : hour.sub} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${active ? 'border-[#705b91] bg-[#705b91] text-white' : 'border-[#e4dced] bg-white text-[#6e6080] hover:border-[#9a84bb]'} disabled:opacity-50`}>{en ? hour.labelEn : hour.label}</button>
+                      return <button key={hour.id} disabled={saving === date || isFuture} onClick={() => toggleHour(date, hour.id)} title={en ? hour.subEn : hour.sub} className={`rounded-full border px-3 py-2 text-xs font-bold transition ${active ? 'border-[#d92d3a] bg-[#d92d3a] text-white' : 'border-[#e4dced] bg-white text-[#6e6080] hover:border-[#9a84bb]'} disabled:opacity-50`}>{en ? hour.labelEn : hour.label}</button>
                     })}
                   </div>
                 </div>

@@ -31,7 +31,7 @@ export default async function SpiritualJournalAdminPage() {
   const sorted = [...members.values()].sort((a, b) => b.days - a.days || a.name.localeCompare(b.name, 'ar'))
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <div><p className="text-xs font-bold tracking-widest text-[#8b77bd]">AGHAPY · CARE VIEW</p><h1 className="mt-1 text-2xl font-black">{en ? 'Spiritual Journal overview' : 'متابعة النوتة الروحية'}</h1><p className="mt-1 text-sm text-navy/60">{en ? `Week: ${weekStart} to ${weekEnd}. For care and encouragement, not comparison or scoring.` : `الأسبوع من ${weekStart} إلى ${weekEnd}. عرض للمتابعة والتشجيع، مش للمقارنة أو التقييم.`}</p></div>
+      <div><p className="text-xs font-bold tracking-widest text-[#d92d3a]">AGHAPY · CARE VIEW</p><h1 className="mt-1 text-2xl font-black">{en ? 'Spiritual Journal overview' : 'متابعة النوتة الروحية'}</h1><p className="mt-1 text-sm text-navy/60">{en ? `Week: ${weekStart} to ${weekEnd}. For care and encouragement, not comparison or scoring.` : `الأسبوع من ${weekStart} إلى ${weekEnd}. عرض للمتابعة والتشجيع، مش للمقارنة أو التقييم.`}</p></div>
       {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{en ? 'Could not load the data.' : 'تعذر تحميل البيانات.'}</p>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-2xl bg-white p-4 ring-1 ring-navy/10"><p className="text-xs text-navy/60">{en ? 'Members who logged' : 'أعضاء سجلوا'}</p><p className="mt-1 text-2xl font-black">{members.size}</p></div>

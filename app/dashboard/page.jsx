@@ -38,7 +38,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-[calc(100dvh-4.25rem)] bg-ice">
-      <header className="bg-gradient-to-br from-[#142b5a] via-[#263f78] to-[#342d59] px-4 pb-20 pt-3 text-white">
+      <header className="bg-gradient-to-br from-navy via-[#1b3974] to-stage px-4 pb-20 pt-3 text-white">
         <div className="mx-auto flex max-w-md items-center justify-between gap-3">
           <HomeMenu links={menu} signOut={signOut} />
           <Toggles className="text-white" />
@@ -47,12 +47,12 @@ export default async function Dashboard() {
       <main className="mx-auto -mt-16 max-w-md space-y-3 px-4 pb-3">
         <section className="rounded-[1.8rem] border border-white bg-white px-5 pb-5 pt-4 text-center shadow-lg ring-1 ring-navy/5">
           <AvatarImage src={profile?.avatar_url} alt="الصورة الشخصية" className="mx-auto h-20 w-20 rounded-full border-4 border-white bg-white object-cover shadow-md" />
-          <p className="mt-3 text-[10px] font-black tracking-[.24em] text-[#8a78ad]">AGHAPY TEAM</p>
+          <p className="mt-3 text-[10px] font-black tracking-[.24em] text-stage">AGHAPY TEAM</p>
           <h1 className="mt-1 text-2xl font-black">{t('home.hi', { name: first })}</h1>
           <p className="mt-1 text-sm text-navy/70">تُعَرِّفُنِي سَبِيلَ الْحَيَاةِ. (مزمور 16:11)</p>
           <p className="text-sm font-bold">{t('home.welcome')}</p>
         </section>
-        <Link href="/scan" className="group flex items-center gap-3 rounded-[1.5rem] bg-gradient-to-r from-[#172f61] via-[#304c83] to-[#80669d] p-4 text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[.99]">
+        <Link href="/scan" className="group flex items-center gap-3 rounded-[1.5rem] bg-gradient-to-r from-navy via-[#1b3974] to-stage p-4 text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:shadow-xl active:scale-[.99]">
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/15"><FeatureIcon name="scan" className="h-6 w-6" /></span>
           <span><span className="block font-bold">{t('home.scan')}</span><span className="text-xs opacity-90">{t('home.scanSub')}</span></span>
           <span className="ms-auto text-xl transition-transform group-hover:-translate-x-1">←</span>

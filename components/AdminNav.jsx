@@ -10,7 +10,7 @@ export default function AdminNav() {
   return <nav className="flex gap-2 overflow-x-auto px-3 pb-4 md:flex-col md:overflow-visible">
     {links.map(([href,key,icon]) => {
       const on = href === '/admin' ? path === href : path.startsWith(href)
-      return <Link key={href} href={href} className={`flex shrink-0 items-center gap-3 whitespace-nowrap rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${on ? 'bg-white text-[#263d70] shadow-md' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}><span className={`grid h-9 w-9 place-items-center rounded-xl ${on?'bg-[#eee8f7] text-[#72549a]':'bg-white/10 text-white'}`}><FeatureIcon name={icon} className="h-5 w-5"/></span>{t(key)}</Link>
+      return <Link key={href} href={href} className={`flex shrink-0 items-center gap-3 whitespace-nowrap rounded-2xl px-3 py-2.5 text-sm font-semibold transition ${on ? 'bg-white text-navy shadow-md' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}><span className={`grid h-9 w-9 place-items-center rounded-xl ${on?'bg-[#fce8ea] text-stage':'bg-white/10 text-white'}`}><FeatureIcon name={icon} className="h-5 w-5"/></span>{t(key)}</Link>
     })}
     <Link href="/dashboard" className="mt-1 flex shrink-0 items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-white/65 transition hover:bg-white/10 hover:text-white md:mt-4">← {t('nav.app')}</Link>
   </nav>

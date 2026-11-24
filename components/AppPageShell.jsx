@@ -2,17 +2,17 @@ import Link from 'next/link'
 import FeatureIcon from '@/components/FeatureIcon'
 
 const themes = {
-  blue: 'from-[#142b5a] via-[#263f78] to-[#5479a8]',
-  violet: 'from-[#2d234d] via-[#59447a] to-[#8a70a8]',
-  rose: 'from-[#542b45] via-[#8a4560] to-[#bd7890]',
-  gold: 'from-[#4c3925] via-[#80613b] to-[#b58a55]',
-  teal: 'from-[#173f46] via-[#28636a] to-[#66a0a0]'
+  blue: 'from-navy via-[#1b3974] to-stage',
+  violet: 'from-navy via-[#1b3974] to-stage',
+  rose: 'from-navy via-[#1b3974] to-stage',
+  gold: 'from-navy via-[#1b3974] to-stage',
+  teal: 'from-navy via-[#1b3974] to-stage'
 }
 
 export default function AppPageShell({ title, eyebrow = 'AGHAPY', description, icon = 'notifications', theme = 'blue', children, wide = false, backLabel = 'رجوع' }) {
   return (
-    <main className={`mx-auto min-h-dvh ${wide ? 'max-w-5xl' : 'max-w-3xl'} bg-[#f7f8fc] px-4 pb-12 pt-5 text-[#1d2b49] sm:px-6`}>
-      <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-[#61708d] transition hover:bg-white hover:text-[#1d2b49]">
+    <main className={`mx-auto min-h-dvh ${wide ? 'max-w-5xl' : 'max-w-3xl'} bg-ice px-4 pb-12 pt-5 text-navy sm:px-6`}>
+      <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-navy/65 transition hover:bg-white hover:text-stage">
         <span aria-hidden="true">←</span> {backLabel}
       </Link>
       <header className={`relative mt-3 overflow-hidden rounded-[2rem] bg-gradient-to-br ${themes[theme] || themes.blue} p-6 text-white shadow-xl sm:p-8`}>

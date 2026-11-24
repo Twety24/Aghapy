@@ -9,10 +9,17 @@ export default function SupportViewer({ sessionId }) {
   async function load() {
     const res = await fetch('/api/admin/support/' + sessionId, { cache: 'no-store' })
     const json = await res.json().catch(() => ({}))
-    if (!res.ok) { setError(json.message || 'تعذر فتح جلسة الدعم.'); return }
+    if (!res.ok) { setData(null); setError(json.message || 'تعذر فتح جلسة الدعم.'); return }
+    setError('')
     setData(json)
   }
   useEffect(() => { load() }, [sessionId])
+  useEffect(() => {
+    if (!data?.session?.expires_at) return
+    const remaining = new Date(data.session.expires_at).getTime() - Date.now()
+    const timeout = setTimeout(() => { setData(null); setError('انتهت جلسة الدعم.') }, Math.max(0, remaining))
+    return () => clearTimeout(timeout)
+  }, [data?.session?.expires_at])
   async function end() {
     setBusy(true)
     const res = await fetch('/api/admin/support/' + sessionId, { method: 'DELETE' })

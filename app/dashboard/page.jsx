@@ -10,7 +10,6 @@ import AvatarImage from '@/components/AvatarImage'
 import NotificationCenter from '@/components/NotificationCenter'
 import NotificationPermissionPrompt from '@/components/NotificationPermissionPrompt'
 import FeatureIcon from '@/components/FeatureIcon'
-import SupportRequests from '@/components/SupportRequests'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,7 +58,6 @@ export default async function Dashboard() {
           <span className="ms-auto text-xl transition-transform group-hover:-translate-x-1">←</span>
         </Link>
         {profile?.role === 'member' && <NotificationPermissionPrompt userId={user.id} initialChoice={notificationPreference ? notificationPreference.device_notifications_enabled : null} />}
-        <SupportRequests />
         <NotificationCenter items={notifications || []} userId={user.id} />
         <div className="grid grid-cols-2 gap-3">
           {cards.map(([href, key, icon, iconTone, cardTone]) => (

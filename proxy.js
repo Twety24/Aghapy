@@ -41,6 +41,22 @@ export async function proxy(request) {
   }
 
   if (isAuthPage) return withCookies(new URL('/dashboard', request.url), response)
+
+  if (path !== '/profile') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profile && !profile.avatar_url) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/profile'
+      url.search = '?complete=photo'
+      return withCookies(url, response)
+    }
+  }
+
   return response
 }
 

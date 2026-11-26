@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useT } from '@/components/LangProvider'
 const departments = [['acting','تمثيل'],['scenography','سينغرافيا'],['media','ميديا'],['music_prep','إعداد موسيقى'],['other','أخرى']]
-export default function ProfileForm({ profile, email, addressRequired = false }) {
+export default function ProfileForm({ profile, email, addressRequired = false, photoRequired = false }) {
   const router = useRouter()
   const { lang } = useT()
   const en = lang === 'en'
@@ -18,6 +18,7 @@ export default function ProfileForm({ profile, email, addressRequired = false })
   async function save(e) {
     e.preventDefault()
     if (form.address.trim().length < 5) { setMsg('اكتب عنوانك بالتفصيل.'); return }
+    if (photoRequired && !photo && !profile.avatar_url) { setMsg('الصورة الشخصية مطلوبة قبل دخول التطبيق.'); return }
     if (form.birth_date) {
       const birthDate = new Date(form.birth_date + 'T00:00:00')
       const today = new Date()
@@ -31,7 +32,7 @@ export default function ProfileForm({ profile, email, addressRequired = false })
     setMsg('')
     let avatar_url = profile.avatar_url || null
     if (photo) {
-      const ext = photo.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const ext = photo.type === 'image/png' ? 'png' : photo.type === 'image/webp' ? 'webp' : 'jpg'
       const path = profile.id + '/' + Date.now() + '.' + ext
       const up = await db.storage.from('avatars').upload(path, photo, { upsert: false, contentType: photo.type || 'image/jpeg', cacheControl: '3600' })
       if (up.error) { setBusy(false); setMsg('فشل رفع الصورة. جرّب صورة تانية.'); return }
@@ -49,17 +50,18 @@ export default function ProfileForm({ profile, email, addressRequired = false })
     }
     setBusy(false)
     setMsg('تم حفظ بياناتك وصورتك.')
-    if (addressRequired) router.replace('/dashboard')
+    if (addressRequired || photoRequired) router.replace('/dashboard')
     else router.refresh()
   }
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value })
   return <AppPageShell title="بياناتي" eyebrow="AGHAPY · MY PROFILE" description="بياناتك وصورتك الشخصية ومعلومات التواصل." icon="profile" theme="violet" backLabel={en?"Back":"رجوع"}>
     <p className="mt-2 text-sm text-navy/60" dir="ltr">{email}</p>
     {addressRequired && <p className="alert-error mt-4" role="alert">لازم تضيف عنوانك قبل ما تقدر تستخدم التطبيق.</p>}
+    {photoRequired && <p className="alert-error mt-4" role="alert">الصورة الشخصية مطلوبة. ارفع صورة واضحة لحسابك قبل دخول التطبيق.</p>}
     <form onSubmit={save} className="mt-5 space-y-4">
       <div className="text-center">
         <img src={preview || '/logo.jpg'} alt="الصورة الشخصية" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.jpg' }} className="mx-auto h-28 w-28 rounded-full border-4 border-white bg-white object-cover shadow-md" />
-        <label className="btn btn-navy mt-3 cursor-pointer">تغيير الصورة<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const file = e.target.files?.[0] || null; setPhoto(file); if (file) setPreview(URL.createObjectURL(file)) }} /></label>
+        <label className="btn btn-navy mt-3 cursor-pointer">{photoRequired ? "إضافة الصورة الشخصية *" : "تغيير الصورة"}<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const file = e.target.files?.[0] || null; setPhoto(file); if (file) setPreview(URL.createObjectURL(file)) }} /></label>
       </div>
       <div><label className="label">الاسم بالكامل</label><input className="input" required value={form.name} onChange={set('name')} /></div>
       <div><label className="label">رقم التليفون</label><input className="input" dir="ltr" type="tel" required value={form.phone} onChange={set('phone')} /></div>

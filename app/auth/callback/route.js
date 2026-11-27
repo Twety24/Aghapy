@@ -11,7 +11,7 @@ export async function GET(request) {
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser()
       const { data: profile } = user ? await supabase.from('profiles').select('avatar_url,address').eq('id', user.id).single() : { data: null }
-      const destination = !profile?.avatar_url ? '/profile?complete=photo' : (!profile.address?.trim() ? '/profile?complete=address' : (next.startsWith('/') ? next : '/dashboard'))
+      const destination = !profile?.avatar_url ? '/auth/complete-photo' : (!profile.address?.trim() ? '/profile?complete=address' : (next.startsWith('/') ? next : '/dashboard'))
       return NextResponse.redirect(`${origin}${destination}`)
     }
   }

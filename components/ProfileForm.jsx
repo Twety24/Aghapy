@@ -1,8 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AppPageShell from '@/components/AppPageShell'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getPendingAvatar, clearPendingAvatar } from '@/lib/pending-avatar'
 import { useT } from '@/components/LangProvider'
 const departments = [['acting','تمثيل'],['scenography','سينغرافيا'],['media','ميديا'],['music_prep','إعداد موسيقى'],['other','أخرى']]
 export default function ProfileForm({ profile, email, addressRequired = false, photoRequired = false }) {
@@ -15,6 +16,26 @@ export default function ProfileForm({ profile, email, addressRequired = false, p
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
   const [preview, setPreview] = useState(profile.avatar_url || '')
+  useEffect(() => {
+    let active = true
+    let objectUrl = ''
+    async function loadPending() {
+      if (profile.avatar_url) return
+      try {
+        const pending = await getPendingAvatar()
+        if (active && pending) {
+          setPhoto(pending)
+          objectUrl = URL.createObjectURL(pending)
+          setPreview(objectUrl)
+        }
+      } catch {}
+    }
+    loadPending()
+    return () => {
+      active = false
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [profile.avatar_url])
   async function save(e) {
     e.preventDefault()
     if (form.address.trim().length < 5) { setMsg('اكتب عنوانك بالتفصيل.'); return }
@@ -48,6 +69,7 @@ export default function ProfileForm({ profile, email, addressRequired = false, p
       setMsg('ماقدرناش نحفظ البيانات. جرّب تاني.')
       return
     }
+    if (photo) { try { await clearPendingAvatar() } catch {} }
     setBusy(false)
     setMsg('تم حفظ بياناتك وصورتك.')
     if (addressRequired || photoRequired) router.replace('/dashboard')
@@ -61,7 +83,7 @@ export default function ProfileForm({ profile, email, addressRequired = false, p
     <form onSubmit={save} className="mt-5 space-y-4">
       <div className="text-center">
         <img src={preview || '/logo.jpg'} alt="الصورة الشخصية" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo.jpg' }} className="mx-auto h-28 w-28 rounded-full border-4 border-white bg-white object-cover shadow-md" />
-        <label className="btn btn-navy mt-3 cursor-pointer">{photoRequired ? "إضافة الصورة الشخصية *" : "تغيير الصورة"}<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => { const file = e.target.files?.[0] || null; setPhoto(file); if (file) setPreview(URL.createObjectURL(file)) }} /></label>
+        <label className="btn btn-navy mt-3 cursor-pointer">{photoRequired ? "إضافة الصورة الشخصية *" : "تغيير الصورة"}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" required={photoRequired && !profile.avatar_url && !photo} onChange={e => { const file = e.target.files?.[0] || null; setPhoto(file); if (file) setPreview(URL.createObjectURL(file)) }} /></label>
       </div>
       <div><label className="label">الاسم بالكامل</label><input className="input" required value={form.name} onChange={set('name')} /></div>
       <div><label className="label">رقم التليفون</label><input className="input" dir="ltr" type="tel" required value={form.phone} onChange={set('phone')} /></div>

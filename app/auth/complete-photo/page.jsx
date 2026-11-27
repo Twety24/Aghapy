@@ -19,11 +19,11 @@ export default function CompletePhotoPage() {
         router.replace('/login')
         return
       }
-      const { data: profile, error: profileError } = await db.from('profiles').select('avatar_url,address').eq('id', user.id).maybeSingle()
+      const { data: profile, error: profileError } = await db.from('profiles').select('avatar_url').eq('id', user.id).maybeSingle()
       if (profileError) throw profileError
       if (profile?.avatar_url) {
         try { await clearPendingAvatar() } catch {}
-        router.replace(!profile.address?.trim() ? '/profile?complete=address' : '/dashboard')
+        router.replace('/dashboard')
         router.refresh()
         return
       }

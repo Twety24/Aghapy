@@ -16,7 +16,7 @@ export async function GET(request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(new URL('/login?auth_error=confirmation', origin))
   if (next === '/reset-password') return NextResponse.redirect(new URL('/reset-password', origin))
-  const { data: profile } = await supabase.from('profiles').select('avatar_url,address').eq('id', user.id).maybeSingle()
-  const destination = !profile?.avatar_url ? '/auth/complete-photo' : (!profile.address?.trim() ? '/profile?complete=address' : next)
+  const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).maybeSingle()
+  const destination = !profile?.avatar_url ? '/auth/complete-photo' : next
   return NextResponse.redirect(new URL(destination, origin))
 }

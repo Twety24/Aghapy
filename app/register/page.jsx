@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { savePendingAvatar, clearPendingAvatar } from '@/lib/pending-avatar'
 import { arabicError } from '@/lib/errors'
 import AuthShell from '@/components/AuthShell'
 import { useT } from '@/components/LangProvider'
@@ -30,20 +31,12 @@ export default function RegisterPage(){
   if(!PHOTO_TYPES.includes(photo.type))return setError(t('register.photoType'))
   if(photo.size>5*1024*1024)return setError(t('register.photoSize'))
   setBusy(true)
+  try{await savePendingAvatar(photo)}catch{setError('تعذر تجهيز الصورة. جرّب اختيارها مرة تانية.');setBusy(false);return}
   const db=createClient()
   const{data,error}=await db.auth.signUp({email:f.email.trim(),password:f.password,options:{data:{full_name:f.name.trim(),phone,address:f.address.trim(),birth_date:f.birth_date,stage:f.stage,department:f.department},emailRedirectTo:`${location.origin}/auth/callback`}})
-  if(error){setError(arabicError(error.message));setBusy(false);return}
-  if(data.session){
-   const ext=photo.type==='image/png'?'png':photo.type==='image/webp'?'webp':'jpg'
-   const path=data.user.id+'/'+Date.now()+'.'+ext
-   const up=await db.storage.from('avatars').upload(path,photo,{upsert:false,contentType:photo.type,cacheControl:'3600'})
-   if(up.error){setError('تم إنشاء الحساب لكن تعذر رفع الصورة. سجّل الدخول وأكمل رفعها قبل استخدام التطبيق.');setBusy(false);return}
-   const avatarUrl=db.storage.from('avatars').getPublicUrl(path).data.publicUrl
-   const saved=await db.from('profiles').update({avatar_url:avatarUrl}).eq('id',data.user.id)
-   if(saved.error){await db.storage.from('avatars').remove([path]);setError('تم رفع الصورة لكن تعذر حفظها في الملف الشخصي. حاول تسجيل الدخول وإكمال الملف.');setBusy(false);return}
-   router.replace('/dashboard');router.refresh();return
-  }
-  setInfo('تم إنشاء الحساب. أكّد بريدك الإلكتروني، وبعد تسجيل الدخول سيُطلب منك رفع صورتك الشخصية قبل دخول التطبيق.')
+  if(error){await clearPendingAvatar();setError(arabicError(error.message));setBusy(false);return}
+  if(data.session){router.replace('/auth/complete-photo');router.refresh();return}
+  setInfo('تم إنشاء الحساب. أكّد بريدك الإلكتروني من نفس المتصفح، وسيتم رفع الصورة تلقائيًا بعد التأكيد. لو أكدت من جهاز تاني، هتقدر ترفعها من بياناتي.')
   setBusy(false)
  }
  return <AuthShell title={t('register.title')} subtitle={t('register.sub')}><form onSubmit={submit} className="space-y-4"><div><label className="label" htmlFor="name">{t('register.name')}</label><input id="name" required className="input" value={f.name} onChange={set('name')} autoComplete="name"/></div><div><label className="label" htmlFor="photo">{t('register.photo')} <span className="text-red-600">*</span></label><div className="flex items-center gap-4"><img src={preview||'/logo.jpg'} alt={t('register.photoPreview')} onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src='/logo.jpg'}} className="h-20 w-20 rounded-full border bg-white object-cover"/><div className="min-w-0 flex-1"><input id="photo" type="file" accept="image/jpeg,image/png,image/webp" required className="input text-sm" onChange={choosePhoto}/><p className="mt-1 text-xs text-navy/60">{t('register.photoHint')}</p></div></div></div><div><label className="label" htmlFor="phone">{t('register.phone')}</label><input id="phone" type="tel" required dir="ltr" className="input" value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="+20 1xxxxxxxxx"/></div><div><label className="label" htmlFor="address">العنوان <span className="text-red-600">*</span></label><textarea id="address" required minLength={5} maxLength={300} className="input min-h-20" value={f.address} onChange={set('address')} placeholder="اكتب عنوانك بالتفصيل"/></div><div><label className="label" htmlFor="birth_date">تاريخ الميلاد</label><input id="birth_date" type="date" required max={new Date().toISOString().slice(0,10)} className="input" value={f.birth_date} onChange={set('birth_date')}/></div><div><label className="label" htmlFor="stage">{t('register.stage')}</label><select id="stage" required className="input" value={f.stage} onChange={set('stage')}><option value="">{t('register.choose')}</option>{STAGES.map(s=><option key={s} value={s}>{t('stage.'+s)}</option>)}</select></div><div><label className="label" htmlFor="department">{t('register.department')}</label><select id="department" required className="input" value={f.department} onChange={set('department')}><option value="">{t('register.choose')}</option>{DEPARTMENTS.map(s=><option key={s} value={s}>{t('department.'+s)}</option>)}</select></div><div><label className="label" htmlFor="email">{t('register.email')}</label><input id="email" type="email" required dir="ltr" className="input" value={f.email} onChange={set('email')} autoComplete="email"/></div><div><label className="label" htmlFor="password">{t('register.password')}</label><input id="password" type="password" required dir="ltr" className="input" value={f.password} onChange={set('password')} autoComplete="new-password"/></div><div><label className="label" htmlFor="confirm">{t('register.confirm')}</label><input id="confirm" type="password" required dir="ltr" className="input" value={f.confirm} onChange={set('confirm')} autoComplete="new-password"/></div>{error&&<p className="alert-error" role="alert">{error}</p>}{info&&<p className="alert-ok" role="status">{info}</p>}<button className="btn btn-red" disabled={busy}>{busy?t('register.busy'):t('register.submit')}</button><p className="text-center text-sm">{t('register.have')} <Link href="/login" className="font-bold underline">{t('register.login')}</Link></p></form></AuthShell>

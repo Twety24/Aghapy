@@ -42,7 +42,9 @@ export async function proxy(request) {
 
   if (isAuthPage) return withCookies(new URL('/dashboard', request.url), response)
 
-  if (path !== '/profile') {
+  const isPhotoCompletion = path === '/auth/complete-photo'
+  const isPasswordRecovery = path === '/reset-password' || path === '/forgot-password'
+  if (path !== '/profile' && !isPhotoCompletion && !isPasswordRecovery) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('avatar_url')
